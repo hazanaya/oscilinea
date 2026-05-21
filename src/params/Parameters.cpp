@@ -136,7 +136,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
 
     layout.add(std::make_unique<Choice>(
         juce::ParameterID { ParamID::sourceAspect, 1 },
-        "Source",
+        "Aspect",
         juce::StringArray { "16:9", "1:1", "9:16", "Free" },
         0));
 

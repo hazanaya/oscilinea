@@ -9,6 +9,23 @@
 
 namespace SoundShape {
 
+class ColourDotButton final : public juce::Button
+{
+public:
+    ColourDotButton();
+
+    void setDotColour(juce::Colour colour);
+    void setDimmed(bool dimmed);
+
+private:
+    void paintButton(juce::Graphics&,
+                     bool shouldDrawButtonAsHighlighted,
+                     bool shouldDrawButtonAsDown) override;
+
+    juce::Colour dotColour_ { juce::Colours::white };
+    bool dimmed_ = false;
+};
+
 class ControlPanel : public juce::Component,
                      private juce::ChangeListener,
                      private juce::ComboBox::Listener
@@ -23,6 +40,7 @@ public:
     void setRecordCallback(std::function<void()> callback);
     void setSourceWindowCallback(std::function<void()> callback);
     void setRecording(bool recording);
+    void setRecordingElapsedSeconds(double elapsedSeconds);
     void setSourceWindowOpen(bool open);
     void refreshFromParameters();
 
@@ -38,6 +56,8 @@ private:
 
     void configureSlider(juce::Slider& slider);
     void configureLabel(juce::Label& label, const juce::String& text);
+    void configureSectionLabel(juce::Label& label, const juce::String& text);
+    void configureSliderText(juce::Slider& slider);
     void showColourPicker(ColourTarget target);
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
@@ -51,6 +71,7 @@ private:
     void updateColourButtons();
     void applyLineStylePreset(int styleIndex);
     void updateAdvancedVisibility();
+    void updateRecordButtonText();
     int getLineStyleIndex() const;
 
     juce::AudioProcessorValueTreeState& apvts_;
@@ -59,7 +80,11 @@ private:
     juce::ToggleButton freezeButton_ { "Freeze" };
     juce::ToggleButton transparentButton_ { "Transparent" };
     juce::TextButton recordButton_ { "Record" };
-    juce::TextButton sourceWindowButton_ { "Source Window" };
+    juce::TextButton sourceWindowButton_ { "Open" };
+
+    juce::Label signalSectionLabel_;
+    juce::Label lookSectionLabel_;
+    juce::Label recordSectionLabel_;
 
     juce::ComboBox fpsCombo_;
     juce::Label fpsLabel_;
@@ -68,8 +93,11 @@ private:
     juce::ComboBox lineStyleCombo_;
     juce::Label lineStyleLabel_;
 
-    juce::TextButton traceColourButton_ { "Trace Color" };
-    juce::TextButton backgroundColourButton_ { "Background" };
+    ColourDotButton traceColourButton_;
+    juce::Label traceColourLabel_;
+    ColourDotButton backgroundColourButton_;
+    juce::Label backgroundColourLabel_;
+    juce::Label sourceWindowLabel_;
 
     juce::Slider levelSlider_;
     juce::Label levelLabel_;
@@ -105,6 +133,8 @@ private:
     std::unique_ptr<SliderAttachment> backgroundOpacityAtt_;
 
     ColourTarget activeColourTarget_ = ColourTarget::Trace;
+    bool recording_ = false;
+    int displayedRecordSeconds_ = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
 };

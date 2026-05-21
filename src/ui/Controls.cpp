@@ -33,6 +33,54 @@ namespace
             h += 360.0f;
         return h / 360.0f;
     }
+
+    juce::String formatRecordTime(int totalSeconds)
+    {
+        totalSeconds = juce::jmax(0, totalSeconds);
+        return juce::String::formatted("%02d:%02d", totalSeconds / 60, totalSeconds % 60);
+    }
+
+    void setEnabledAlpha(juce::Component& component, bool enabled)
+    {
+        component.setEnabled(enabled);
+        component.setAlpha(enabled ? 1.0f : 0.4f);
+    }
+}
+
+ColourDotButton::ColourDotButton()
+    : juce::Button({})
+{
+}
+
+void ColourDotButton::setDotColour(juce::Colour colour)
+{
+    dotColour_ = colour;
+    repaint();
+}
+
+void ColourDotButton::setDimmed(bool dimmed)
+{
+    dimmed_ = dimmed;
+    repaint();
+}
+
+void ColourDotButton::paintButton(juce::Graphics& g, bool highlighted, bool down)
+{
+    const auto b = getLocalBounds().toFloat().reduced(1.0f);
+    const float diameter = juce::jmin(b.getWidth(), b.getHeight());
+    const auto dot = juce::Rectangle<float>(diameter, diameter)
+                        .withCentre(b.getCentre());
+
+    auto colour = dotColour_.withAlpha(dimmed_ ? 0.4f : 1.0f);
+    if (down)
+        colour = colour.darker(0.08f);
+    else if (highlighted)
+        colour = colour.brighter(0.08f);
+
+    g.setColour(colour);
+    g.fillEllipse(dot);
+    g.setColour(juce::Colours::white.withAlpha(highlighted ? 0.55f : 0.28f));
+    g.drawEllipse(dot.reduced(0.5f), 1.0f);
 }
 
 ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
@@ -44,8 +92,12 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     addAndMakeVisible(recordButton_);
     addAndMakeVisible(sourceWindowButton_);
 
+    configureSectionLabel(signalSectionLabel_, "Signal");
+    configureSectionLabel(lookSectionLabel_, "Look");
+    configureSectionLabel(recordSectionLabel_, "Record");
+
     configureLabel(fpsLabel_, "FPS");
-    configureLabel(sourceAspectLabel_, "Source");
+    configureLabel(sourceAspectLabel_, "Aspect");
     configureLabel(lineStyleLabel_, "Line");
     configureLabel(levelLabel_, "Level");
     configureLabel(smoothingLabel_, "Smooth");
@@ -54,6 +106,9 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     configureLabel(opacityLabel_, "Opacity");
     configureLabel(glowLabel_, "Glow");
     configureLabel(backgroundOpacityLabel_, "BG Opacity");
+    configureLabel(traceColourLabel_, "Trace");
+    configureLabel(backgroundColourLabel_, "Bg");
+    configureLabel(sourceWindowLabel_, "Source Window");
 
     addAndMakeVisible(fpsCombo_);
     addAndMakeVisible(sourceAspectCombo_);
@@ -96,6 +151,14 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     glowAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::glowAmount, glowSlider_);
     backgroundOpacityAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::bgAlpha, backgroundOpacitySlider_);
 
+    configureSliderText(levelSlider_);
+    configureSliderText(smoothingSlider_);
+    configureSliderText(persistenceSlider_);
+    configureSliderText(thicknessSlider_);
+    configureSliderText(opacitySlider_);
+    configureSliderText(glowSlider_);
+    configureSliderText(backgroundOpacitySlider_);
+
     lineStyleCombo_.addListener(this);
     transparentButton_.onClick = [this]() { updateAdvancedVisibility(); };
 
@@ -113,7 +176,8 @@ ControlPanel::~ControlPanel()
 void ControlPanel::configureSlider(juce::Slider& slider)
 {
     slider.setSliderStyle(juce::Slider::LinearHorizontal);
-    slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 58, 20);
+    slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 48, 20);
+    slider.setNumDecimalPlacesToDisplay(2);
     addAndMakeVisible(slider);
 }
 
@@ -122,6 +186,26 @@ void ControlPanel::configureLabel(juce::Label& label, const juce::String& text)
     label.setText(text, juce::dontSendNotification);
     label.setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(label);
+}
+
+void ControlPanel::configureSectionLabel(juce::Label& label, const juce::String& text)
+{
+    label.setText(text, juce::dontSendNotification);
+    label.setJustificationType(juce::Justification::centredLeft);
+    label.setColour(juce::Label::textColourId, juce::Colour(0xff8e8e93));
+    addAndMakeVisible(label);
+}
+
+void ControlPanel::configureSliderText(juce::Slider& slider)
+{
+    slider.textFromValueFunction = [](double value)
+    {
+        return juce::String(value, 2);
+    };
+    slider.valueFromTextFunction = [](const juce::String& text)
+    {
+        return text.getDoubleValue();
+    };
 }
 
 float ControlPanel::getFloatParam(const juce::String& paramID, float fallback) const
@@ -173,21 +257,16 @@ juce::Colour ControlPanel::getBackgroundColour() const
 void ControlPanel::updateColourButtons()
 {
     const auto trace = getTraceColour();
-    const auto bg = getBackgroundColour();
+    const bool transparent = getBoolParam(ParamID::transparentBg, true);
+    const auto bgPreview = juce::Colour::fromHSV(hue01(getFloatParam(ParamID::bgHue, 0.0f)),
+                                                 getFloatParam(ParamID::bgSaturation, 0.0f),
+                                                 getFloatParam(ParamID::bgBrightness, 0.0f),
+                                                 1.0f);
 
-    traceColourButton_.setColour(juce::TextButton::buttonColourId, trace.withAlpha(1.0f));
-    traceColourButton_.setColour(juce::TextButton::textColourOffId,
-                                 trace.getPerceivedBrightness() > 0.55f
-                                     ? juce::Colours::black
-                                     : juce::Colours::white);
-
-    const auto bgPreview = bg.getFloatAlpha() <= 0.0f ? juce::Colour(0xffe5e5ea)
-                                                      : bg.withAlpha(1.0f);
-    backgroundColourButton_.setColour(juce::TextButton::buttonColourId, bgPreview);
-    backgroundColourButton_.setColour(juce::TextButton::textColourOffId,
-                                      bgPreview.getPerceivedBrightness() > 0.55f
-                                          ? juce::Colours::black
-                                          : juce::Colours::white);
+    traceColourButton_.setDotColour(trace.withAlpha(1.0f));
+    traceColourButton_.setDimmed(false);
+    backgroundColourButton_.setDotColour(bgPreview);
+    backgroundColourButton_.setDimmed(transparent);
 }
 
 int ControlPanel::getLineStyleIndex() const
@@ -246,16 +325,10 @@ void ControlPanel::updateAdvancedVisibility()
     const bool transparent = transparentButton_.getToggleState()
                              || getBoolParam(ParamID::transparentBg, true);
 
-    const bool wasGlowVisible = glowSlider_.isVisible();
-    const bool wasBackgroundOpacityVisible = backgroundOpacitySlider_.isVisible();
-
-    glowLabel_.setVisible(usesGlow);
-    glowSlider_.setVisible(usesGlow);
-    backgroundOpacityLabel_.setVisible(! transparent);
-    backgroundOpacitySlider_.setVisible(! transparent);
-
-    if (wasGlowVisible != usesGlow || wasBackgroundOpacityVisible == transparent)
-        resized();
+    setEnabledAlpha(glowLabel_, usesGlow);
+    setEnabledAlpha(glowSlider_, usesGlow);
+    setEnabledAlpha(backgroundOpacityLabel_, ! transparent);
+    setEnabledAlpha(backgroundOpacitySlider_, ! transparent);
 }
 
 void ControlPanel::refreshFromParameters()
@@ -276,17 +349,44 @@ void ControlPanel::setSourceWindowCallback(std::function<void()> callback)
 
 void ControlPanel::setRecording(bool recording)
 {
-    recordButton_.setButtonText(recording ? "Stop" : "Record");
+    recording_ = recording;
+    displayedRecordSeconds_ = recording ? 0 : -1;
+    updateRecordButtonText();
     recordButton_.setColour(juce::TextButton::buttonColourId,
-                            recording ? juce::Colour(0xffd92d20) : juce::Colour(0xff8e8e93));
+                            recording ? juce::Colour(0xffff3b30) : juce::Colour(0xff6e6e73));
     recordButton_.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+}
+
+void ControlPanel::setRecordingElapsedSeconds(double elapsedSeconds)
+{
+    if (! recording_)
+        return;
+
+    const int seconds = static_cast<int>(elapsedSeconds);
+    if (seconds == displayedRecordSeconds_)
+        return;
+
+    displayedRecordSeconds_ = seconds;
+    updateRecordButtonText();
 }
 
 void ControlPanel::setSourceWindowOpen(bool open)
 {
-    sourceWindowButton_.setButtonText(open ? "Hide Source" : "Source Window");
+    sourceWindowButton_.setButtonText(open ? "Hide" : "Open");
     sourceWindowButton_.setColour(juce::TextButton::buttonColourId,
                                   open ? juce::Colour(0xff6e6e73) : juce::Colours::transparentBlack);
+}
+
+void ControlPanel::updateRecordButtonText()
+{
+    if (! recording_)
+    {
+        recordButton_.setButtonText("Record");
+        return;
+    }
+
+    recordButton_.setButtonText(juce::String::fromUTF8("\xe2\x97\x8f ")
+                                + formatRecordTime(displayedRecordSeconds_));
 }
 
 int ControlPanel::getCaptureFps() const
@@ -388,25 +488,31 @@ void ControlPanel::paint(juce::Graphics& g)
 
 void ControlPanel::resized()
 {
-    auto bounds = getLocalBounds().reduced(12, 10);
+    auto bounds = getLocalBounds().reduced(12, 8);
 
     constexpr int rowGap = 8;
-    constexpr int labelH = 17;
-    const int rowH = (bounds.getHeight() - 3 * rowGap) / 4;
+    constexpr int labelH = 15;
+    constexpr int contentGap = 8;
+    constexpr int sectionW = 58;
+    const int rowH = (bounds.getHeight() - 2 * rowGap) / 3;
 
-    auto row1 = bounds.removeFromTop(rowH);
+    auto signalRow = bounds.removeFromTop(rowH);
     bounds.removeFromTop(rowGap);
-    auto row2 = bounds.removeFromTop(rowH);
+    auto lookRow = bounds.removeFromTop(rowH);
     bounds.removeFromTop(rowGap);
-    auto row3 = bounds.removeFromTop(rowH);
-    bounds.removeFromTop(rowGap);
-    auto row4 = bounds;
+    auto recordRow = bounds;
 
     auto take = [](juce::Rectangle<int>& row, int w)
     {
-        auto r = row.removeFromLeft(w);
-        row.removeFromLeft(8);
+        auto r = row.removeFromLeft(juce::jmin(w, row.getWidth()));
+        row.removeFromLeft(juce::jmin(contentGap, row.getWidth()));
         return r;
+    };
+
+    auto takeSection = [](juce::Rectangle<int>& row, juce::Label& label)
+    {
+        label.setBounds(row.removeFromLeft(juce::jmin(sectionW, row.getWidth())));
+        row.removeFromLeft(juce::jmin(contentGap, row.getWidth()));
     };
 
     auto layoutLabeled = [](juce::Rectangle<int> area,
@@ -418,36 +524,47 @@ void ControlPanel::resized()
         control.setBounds(area);
     };
 
-    recordButton_.setBounds(take(row1, 98));
-    sourceWindowButton_.setBounds(take(row1, 122));
-    layoutLabeled(take(row1, 82), fpsLabel_, fpsCombo_);
-    layoutLabeled(take(row1, 104), sourceAspectLabel_, sourceAspectCombo_);
-    freezeButton_.setBounds(take(row1, 94));
+    auto layoutSwitch = [](juce::Rectangle<int> area, juce::ToggleButton& button)
+    {
+        button.setBounds(area.withSizeKeepingCentre(area.getWidth(), 24));
+    };
 
-    traceColourButton_.setBounds(take(row2, 132));
-    layoutLabeled(take(row2, 132), lineStyleLabel_, lineStyleCombo_);
-    backgroundColourButton_.setBounds(take(row2, 132));
-    transparentButton_.setBounds(take(row2, 126));
+    auto layoutColour = [](juce::Rectangle<int> area, ColourDotButton& dot, juce::Label& label)
+    {
+        const auto dotBounds = area.withWidth(22).withSizeKeepingCentre(22, 22);
+        dot.setBounds(dotBounds);
+        label.setBounds(area.withTrimmedLeft(28));
+    };
 
-    if (backgroundOpacitySlider_.isVisible())
-        layoutLabeled(row2.reduced(4, 0), backgroundOpacityLabel_, backgroundOpacitySlider_);
+    takeSection(signalRow, signalSectionLabel_);
+    layoutSwitch(take(signalRow, 106), autoGainButton_);
+    layoutSwitch(signalRow.removeFromRight(84), freezeButton_);
+    if (signalRow.getWidth() > contentGap)
+        signalRow.removeFromRight(contentGap);
 
-    const int lineCells = glowSlider_.isVisible() ? 3 : 2;
-    const int w3 = row3.getWidth() / lineCells;
-    layoutLabeled(row3.removeFromLeft(w3).reduced(4, 0), thicknessLabel_, thicknessSlider_);
-    if (lineCells == 2)
-        layoutLabeled(row3.reduced(4, 0), opacityLabel_, opacitySlider_);
-    else
-        layoutLabeled(row3.removeFromLeft(w3).reduced(4, 0), opacityLabel_, opacitySlider_);
+    const int signalSliderW = signalRow.getWidth() / 3;
+    layoutLabeled(signalRow.removeFromLeft(signalSliderW).reduced(2, 0), levelLabel_, levelSlider_);
+    layoutLabeled(signalRow.removeFromLeft(signalSliderW).reduced(2, 0), smoothingLabel_, smoothingSlider_);
+    layoutLabeled(signalRow.reduced(2, 0), persistenceLabel_, persistenceSlider_);
 
-    if (glowSlider_.isVisible())
-        layoutLabeled(row3.reduced(4, 0), glowLabel_, glowSlider_);
+    takeSection(lookRow, lookSectionLabel_);
+    auto swatches = take(lookRow, 116);
+    layoutColour(swatches.removeFromLeft(58), traceColourButton_, traceColourLabel_);
+    layoutColour(swatches, backgroundColourButton_, backgroundColourLabel_);
+    layoutSwitch(take(lookRow, 112), transparentButton_);
+    layoutLabeled(take(lookRow, 108), lineStyleLabel_, lineStyleCombo_);
 
-    autoGainButton_.setBounds(take(row4, 118));
-    const int w4 = row4.getWidth() / 3;
-    layoutLabeled(row4.removeFromLeft(w4).reduced(4, 0), levelLabel_, levelSlider_);
-    layoutLabeled(row4.removeFromLeft(w4).reduced(4, 0), smoothingLabel_, smoothingSlider_);
-    layoutLabeled(row4.reduced(4, 0), persistenceLabel_, persistenceSlider_);
+    const int lookSliderW = lookRow.getWidth() / 4;
+    layoutLabeled(lookRow.removeFromLeft(lookSliderW).reduced(2, 0), thicknessLabel_, thicknessSlider_);
+    layoutLabeled(lookRow.removeFromLeft(lookSliderW).reduced(2, 0), opacityLabel_, opacitySlider_);
+    layoutLabeled(lookRow.removeFromLeft(lookSliderW).reduced(2, 0), glowLabel_, glowSlider_);
+    layoutLabeled(lookRow.reduced(2, 0), backgroundOpacityLabel_, backgroundOpacitySlider_);
+
+    takeSection(recordRow, recordSectionLabel_);
+    recordButton_.setBounds(take(recordRow, 112).reduced(0, 6));
+    layoutLabeled(take(recordRow, 78), fpsLabel_, fpsCombo_);
+    layoutLabeled(take(recordRow, 98), sourceAspectLabel_, sourceAspectCombo_);
+    layoutLabeled(take(recordRow, 118), sourceWindowLabel_, sourceWindowButton_);
 }
 
 } // namespace SoundShape

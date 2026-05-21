@@ -8,7 +8,7 @@ namespace SoundShape {
 
 namespace
 {
-    constexpr int panelHeight = 220;
+    constexpr int panelHeight = 172;
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
@@ -41,7 +41,7 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
 
     setSize(940, 720);
     setResizable(true, true);
-    setResizeLimits(640, 520, 3840, 2400);
+    setResizeLimits(780, 520, 3840, 2400);
 }
 
 PluginEditor::~PluginEditor()
@@ -68,8 +68,8 @@ void PluginEditor::resized()
 
     view_.setBounds(bounds);
 
-    constexpr int toggleW = 86;
-    constexpr int toggleH = 22;
+    constexpr int toggleW = 24;
+    constexpr int toggleH = 18;
     constexpr int margin = 10;
     const int toggleY = panelVisible_
                         ? fullBounds.getBottom() - panelHeight - toggleH - 2
@@ -84,7 +84,7 @@ void PluginEditor::setPanelVisible(bool visible)
 {
     panelVisible_ = visible;
     controls_.setVisible(visible);
-    panelToggleButton_.setButtonText(visible ? "Hide" : "Controls");
+    panelToggleButton_.setButtonText(visible ? "v" : "^");
     resized();
 }
 
@@ -116,6 +116,7 @@ void PluginEditor::toggleRecording()
         const auto result = recorder_.stop();
         controls_.setRecording(false);
         activeCaptureFile_ = juce::File();
+        recordStartMs_ = 0.0;
 
         if (result.failed())
         {
@@ -144,10 +145,11 @@ void PluginEditor::beginRecording()
                                         view_.hasTransparentBackground());
     if (result.wasOk())
     {
+        const double nowMs = juce::Time::getMillisecondCounterHiRes();
         activeCaptureFile_ = outputFile;
         recorder_.addFrame(snapshot);
-        nextCaptureMs_ = juce::Time::getMillisecondCounterHiRes()
-                         + 1000.0 / static_cast<double>(controls_.getCaptureFps());
+        recordStartMs_ = nowMs;
+        nextCaptureMs_ = nowMs + 1000.0 / static_cast<double>(controls_.getCaptureFps());
         controls_.setRecording(true);
         return;
     }
@@ -221,6 +223,7 @@ void PluginEditor::toggleSourceWindow()
 void PluginEditor::onVBlank()
 {
     controls_.refreshFromParameters();
+    const double nowMs = juce::Time::getMillisecondCounterHiRes();
 
     if (huePtr_ != nullptr)
     {
@@ -235,9 +238,12 @@ void PluginEditor::onVBlank()
 
     view_.tick();
 
+    if (recorder_.isRecording())
+        controls_.setRecordingElapsedSeconds((nowMs - recordStartMs_) / 1000.0);
+
     const bool needsSourceFrame = sourceWindow_ != nullptr && sourceWindow_->isVisible();
     const bool needsRecordFrame = recorder_.isRecording()
-                                  && juce::Time::getMillisecondCounterHiRes() >= nextCaptureMs_;
+                                  && nowMs >= nextCaptureMs_;
 
     if (needsSourceFrame || needsRecordFrame)
     {

@@ -30,8 +30,8 @@ bool SystemLookAndFeel::darkMode() const noexcept
 juce::Colour SystemLookAndFeel::accent() const noexcept
 {
     return juce::Colour::fromHSV(hue01(accentHueDeg_.load(std::memory_order_relaxed)),
-                                 0.52f,
-                                 darkMode() ? 0.92f : 0.62f,
+                                 0.28f,
+                                 darkMode() ? 0.72f : 0.52f,
                                  1.0f);
 }
 

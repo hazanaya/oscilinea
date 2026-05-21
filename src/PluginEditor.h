@@ -69,6 +69,7 @@ private:
     std::atomic<float>* huePtr_ = nullptr;
     float lastHue_ = -1.0f;
     double nextCaptureMs_ = 0.0;
+    double recordStartMs_ = 0.0;
     int lastSourceAspect_ = -1;
     bool panelVisible_ = true;
 
