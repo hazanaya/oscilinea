@@ -36,7 +36,9 @@ auval -v aufx Sshp Hzny
 
 - **Record...** opens a save dialog and writes a `.mov` capture wherever you choose.
 - **OBS Window** opens a separate live window named `Sound Shape Source`, intended for OBS Window Capture and similar tools.
+- New instances start with a white clean trace over a transparent background.
 - **Transparent** backgrounds are available for the display. Transparent recordings use a ProRes 4444 `.mov` so alpha can survive export; opaque recordings use H.264.
+- The panel can be hidden; its toggle is intentionally invisible until hovered.
 - A true virtual camera/video-device output is not implemented in v0.1; that requires a separate macOS video-device, Syphon, or NDI-style integration.
 
 ## Project Layout

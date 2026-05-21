@@ -96,12 +96,19 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     glowAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::glowAmount, glowSlider_);
     backgroundOpacityAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::bgAlpha, backgroundOpacitySlider_);
 
+    lineStyleCombo_.addListener(this);
+    transparentButton_.onClick = [this]() { updateAdvancedVisibility(); };
+
     setRecording(false);
     setSourceWindowOpen(false);
     updateColourButtons();
+    updateAdvancedVisibility();
 }
 
-ControlPanel::~ControlPanel() = default;
+ControlPanel::~ControlPanel()
+{
+    lineStyleCombo_.removeListener(this);
+}
 
 void ControlPanel::configureSlider(juce::Slider& slider)
 {
@@ -183,9 +190,78 @@ void ControlPanel::updateColourButtons()
                                           : juce::Colours::white);
 }
 
+int ControlPanel::getLineStyleIndex() const
+{
+    const int selected = lineStyleCombo_.getSelectedItemIndex();
+    if (selected >= 0)
+        return selected;
+
+    if (auto* param = dynamic_cast<juce::AudioParameterChoice*>(apvts_.getParameter(ParamID::traceStyle)))
+        return param->getIndex();
+
+    return 0;
+}
+
+void ControlPanel::applyLineStylePreset(int styleIndex)
+{
+    switch (juce::jlimit(0, 4, styleIndex))
+    {
+        case 1: // Glow
+            setFloatParam(ParamID::thickness, 2.0f);
+            setFloatParam(ParamID::traceOpacity, 1.0f);
+            setFloatParam(ParamID::glowAmount, 0.28f);
+            break;
+
+        case 2: // Neon
+            setFloatParam(ParamID::thickness, 1.35f);
+            setFloatParam(ParamID::traceOpacity, 1.0f);
+            setFloatParam(ParamID::glowAmount, 0.82f);
+            break;
+
+        case 3: // Soft
+            setFloatParam(ParamID::thickness, 3.0f);
+            setFloatParam(ParamID::traceOpacity, 0.72f);
+            setFloatParam(ParamID::glowAmount, 0.58f);
+            break;
+
+        case 4: // Ink
+            setFloatParam(ParamID::thickness, 2.4f);
+            setFloatParam(ParamID::traceOpacity, 1.0f);
+            setFloatParam(ParamID::glowAmount, 0.0f);
+            break;
+
+        case 0: // Clean
+        default:
+            setFloatParam(ParamID::thickness, 2.0f);
+            setFloatParam(ParamID::traceOpacity, 1.0f);
+            setFloatParam(ParamID::glowAmount, 0.0f);
+            break;
+    }
+}
+
+void ControlPanel::updateAdvancedVisibility()
+{
+    const int style = getLineStyleIndex();
+    const bool usesGlow = style == 1 || style == 2 || style == 3;
+    const bool transparent = transparentButton_.getToggleState()
+                             || getBoolParam(ParamID::transparentBg, true);
+
+    const bool wasGlowVisible = glowSlider_.isVisible();
+    const bool wasBackgroundOpacityVisible = backgroundOpacitySlider_.isVisible();
+
+    glowLabel_.setVisible(usesGlow);
+    glowSlider_.setVisible(usesGlow);
+    backgroundOpacityLabel_.setVisible(! transparent);
+    backgroundOpacitySlider_.setVisible(! transparent);
+
+    if (wasGlowVisible != usesGlow || wasBackgroundOpacityVisible == transparent)
+        resized();
+}
+
 void ControlPanel::refreshFromParameters()
 {
     updateColourButtons();
+    updateAdvancedVisibility();
 }
 
 void ControlPanel::setRecordCallback(std::function<void()> callback)
@@ -202,14 +278,15 @@ void ControlPanel::setRecording(bool recording)
 {
     recordButton_.setButtonText(recording ? "Stop" : "Record...");
     recordButton_.setColour(juce::TextButton::buttonColourId,
-                            recording ? juce::Colour(0xffd92d20) : juce::Colour(0xff0a84ff));
+                            recording ? juce::Colour(0xffd92d20) : juce::Colour(0xff8e8e93));
+    recordButton_.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
 }
 
 void ControlPanel::setSourceWindowOpen(bool open)
 {
     sourceWindowButton_.setButtonText(open ? "Hide OBS" : "OBS Window");
     sourceWindowButton_.setColour(juce::TextButton::buttonColourId,
-                                  open ? juce::Colour(0xff34c759) : juce::Colours::transparentBlack);
+                                  open ? juce::Colour(0xff6e6e73) : juce::Colours::transparentBlack);
 }
 
 int ControlPanel::getCaptureFps() const
@@ -283,6 +360,16 @@ void ControlPanel::changeListenerCallback(juce::ChangeBroadcaster* source)
     repaint();
 }
 
+void ControlPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &lineStyleCombo_)
+    {
+        applyLineStylePreset(getLineStyleIndex());
+        updateAdvancedVisibility();
+        repaint();
+    }
+}
+
 void ControlPanel::paint(juce::Graphics& g)
 {
     if (auto* lnf = systemLnf(*this))
@@ -331,24 +418,32 @@ void ControlPanel::resized()
         control.setBounds(area);
     };
 
-    autoGainButton_.setBounds(take(row1, 118));
-    freezeButton_.setBounds(take(row1, 94));
     recordButton_.setBounds(take(row1, 98));
     sourceWindowButton_.setBounds(take(row1, 122));
     layoutLabeled(take(row1, 82), fpsLabel_, fpsCombo_);
     layoutLabeled(take(row1, 104), sourceAspectLabel_, sourceAspectCombo_);
+    freezeButton_.setBounds(take(row1, 94));
 
     traceColourButton_.setBounds(take(row2, 132));
+    layoutLabeled(take(row2, 132), lineStyleLabel_, lineStyleCombo_);
     backgroundColourButton_.setBounds(take(row2, 132));
     transparentButton_.setBounds(take(row2, 126));
-    layoutLabeled(take(row2, 132), lineStyleLabel_, lineStyleCombo_);
-    layoutLabeled(row2.reduced(4, 0), backgroundOpacityLabel_, backgroundOpacitySlider_);
 
-    const int w3 = row3.getWidth() / 3;
+    if (backgroundOpacitySlider_.isVisible())
+        layoutLabeled(row2.reduced(4, 0), backgroundOpacityLabel_, backgroundOpacitySlider_);
+
+    const int lineCells = glowSlider_.isVisible() ? 3 : 2;
+    const int w3 = row3.getWidth() / lineCells;
     layoutLabeled(row3.removeFromLeft(w3).reduced(4, 0), thicknessLabel_, thicknessSlider_);
-    layoutLabeled(row3.removeFromLeft(w3).reduced(4, 0), opacityLabel_, opacitySlider_);
-    layoutLabeled(row3.reduced(4, 0), glowLabel_, glowSlider_);
+    if (lineCells == 2)
+        layoutLabeled(row3.reduced(4, 0), opacityLabel_, opacitySlider_);
+    else
+        layoutLabeled(row3.removeFromLeft(w3).reduced(4, 0), opacityLabel_, opacitySlider_);
 
+    if (glowSlider_.isVisible())
+        layoutLabeled(row3.reduced(4, 0), glowLabel_, glowSlider_);
+
+    autoGainButton_.setBounds(take(row4, 118));
     const int w4 = row4.getWidth() / 3;
     layoutLabeled(row4.removeFromLeft(w4).reduced(4, 0), levelLabel_, levelSlider_);
     layoutLabeled(row4.removeFromLeft(w4).reduced(4, 0), smoothingLabel_, smoothingSlider_);

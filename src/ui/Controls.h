@@ -10,7 +10,8 @@
 namespace SoundShape {
 
 class ControlPanel : public juce::Component,
-                     private juce::ChangeListener
+                     private juce::ChangeListener,
+                     private juce::ComboBox::Listener
 {
 public:
     explicit ControlPanel(juce::AudioProcessorValueTreeState& apvts);
@@ -39,6 +40,7 @@ private:
     void configureLabel(juce::Label& label, const juce::String& text);
     void showColourPicker(ColourTarget target);
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
     float getFloatParam(const juce::String& paramID, float fallback) const;
     bool getBoolParam(const juce::String& paramID, bool fallback) const;
@@ -47,6 +49,9 @@ private:
     juce::Colour getTraceColour() const;
     juce::Colour getBackgroundColour() const;
     void updateColourButtons();
+    void applyLineStylePreset(int styleIndex);
+    void updateAdvancedVisibility();
+    int getLineStyleIndex() const;
 
     juce::AudioProcessorValueTreeState& apvts_;
 

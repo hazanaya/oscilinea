@@ -44,7 +44,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::ParameterID { ParamID::persistence, 1 },
         "Trail",
         Range { 0.0f, 0.96f, 0.001f },
-        0.08f,
+        0.0f,
         juce::String {}));
 
     layout.add(std::make_unique<Float>(
@@ -58,27 +58,27 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::ParameterID { ParamID::traceStyle, 1 },
         "Line",
         juce::StringArray { "Clean", "Glow", "Neon", "Soft", "Ink" },
-        1));
+        0));
 
     layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::traceHue, 1 },
         "Hue",
         Range { 0.0f, 360.0f, 1.0f },
-        185.0f,
+        0.0f,
         juce::String { "deg" }));
 
     layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::traceSaturation, 1 },
         "Saturation",
         Range { 0.0f, 1.0f, 0.01f },
-        0.62f,
+        0.0f,
         juce::String {}));
 
     layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::traceBrightness, 1 },
         "Brightness",
         Range { 0.0f, 1.0f, 0.01f },
-        0.96f,
+        1.0f,
         juce::String {}));
 
     layout.add(std::make_unique<Float>(
@@ -92,7 +92,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::ParameterID { ParamID::glowAmount, 1 },
         "Glow",
         Range { 0.0f, 1.0f, 0.01f },
-        0.28f,
+        0.0f,
         juce::String {}));
 
     layout.add(std::make_unique<Float>(
@@ -120,13 +120,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::ParameterID { ParamID::bgAlpha, 1 },
         "Background Opacity",
         Range { 0.0f, 1.0f, 0.01f },
-        1.0f,
+        0.0f,
         juce::String {}));
 
     layout.add(std::make_unique<Bool>(
         juce::ParameterID { ParamID::transparentBg, 1 },
         "Transparent",
-        false));
+        true));
 
     layout.add(std::make_unique<Choice>(
         juce::ParameterID { ParamID::captureFps, 1 },

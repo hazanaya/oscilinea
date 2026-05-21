@@ -4,6 +4,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include <atomic>
+#include <functional>
 #include <memory>
 
 #include "PluginProcessor.h"
@@ -15,6 +16,26 @@
 
 namespace SoundShape {
 
+class PanelToggleButton final : public juce::TextButton
+{
+public:
+    std::function<void(bool)> onHoverChanged;
+
+    void mouseEnter(const juce::MouseEvent& event) override
+    {
+        juce::TextButton::mouseEnter(event);
+        if (onHoverChanged)
+            onHoverChanged(true);
+    }
+
+    void mouseExit(const juce::MouseEvent& event) override
+    {
+        juce::TextButton::mouseExit(event);
+        if (onHoverChanged)
+            onHoverChanged(false);
+    }
+};
+
 class PluginEditor final : public juce::AudioProcessorEditor
 {
 public:
@@ -25,6 +46,8 @@ public:
     void resized() override;
 
 private:
+    void setPanelVisible(bool visible);
+    void updatePanelToggleChrome(bool hovered);
     void onVBlank();
     void toggleRecording();
     void beginRecordingAt(const juce::File& outputFile);
@@ -35,6 +58,7 @@ private:
     SystemLookAndFeel lookAndFeel_;
     SoundShapeView view_;
     ControlPanel controls_;
+    PanelToggleButton panelToggleButton_;
     juce::VBlankAttachment vblank_;
     VideoRecorder recorder_;
     std::unique_ptr<SourceWindow> sourceWindow_;
@@ -44,6 +68,7 @@ private:
     float lastHue_ = -1.0f;
     double nextCaptureMs_ = 0.0;
     int lastSourceAspect_ = -1;
+    bool panelVisible_ = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

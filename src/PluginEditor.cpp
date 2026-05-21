@@ -32,6 +32,12 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
 
     addAndMakeVisible(view_);
     addAndMakeVisible(controls_);
+    panelToggleButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+    panelToggleButton_.onClick = [this]() { setPanelVisible(! panelVisible_); };
+    panelToggleButton_.onHoverChanged = [this](bool hovered) { updatePanelToggleChrome(hovered); };
+    addAndMakeVisible(panelToggleButton_);
+    setPanelVisible(true);
+    updatePanelToggleChrome(false);
 
     setSize(940, 720);
     setResizable(true, true);
@@ -55,8 +61,40 @@ void PluginEditor::paint(juce::Graphics& g)
 void PluginEditor::resized()
 {
     auto bounds = getLocalBounds();
-    controls_.setBounds(bounds.removeFromBottom(panelHeight));
+    const auto fullBounds = bounds;
+
+    if (panelVisible_)
+        controls_.setBounds(bounds.removeFromBottom(panelHeight));
+
     view_.setBounds(bounds);
+
+    constexpr int toggleW = 86;
+    constexpr int toggleH = 22;
+    constexpr int margin = 10;
+    const int toggleY = panelVisible_
+                        ? fullBounds.getBottom() - panelHeight - toggleH - 2
+                        : fullBounds.getBottom() - toggleH - margin;
+    panelToggleButton_.setBounds(fullBounds.getRight() - toggleW - margin,
+                                 toggleY,
+                                 toggleW,
+                                 toggleH);
+}
+
+void PluginEditor::setPanelVisible(bool visible)
+{
+    panelVisible_ = visible;
+    controls_.setVisible(visible);
+    panelToggleButton_.setButtonText(visible ? "Hide" : "Controls");
+    resized();
+}
+
+void PluginEditor::updatePanelToggleChrome(bool hovered)
+{
+    panelToggleButton_.setAlpha(hovered ? 0.92f : 0.0f);
+    panelToggleButton_.setColour(juce::TextButton::buttonColourId,
+                                 lookAndFeel_.controlFill().withAlpha(0.88f));
+    panelToggleButton_.setColour(juce::TextButton::textColourOffId,
+                                 lookAndFeel_.primaryText());
 }
 
 juce::File PluginEditor::makeCaptureFile() const
