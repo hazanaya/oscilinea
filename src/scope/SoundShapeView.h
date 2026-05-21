@@ -39,6 +39,7 @@ private:
     std::atomic<float>* pAmplitudeDb_ = nullptr;
     std::atomic<float>* pFreeze_ = nullptr;
     std::atomic<float>* pSmoothing_ = nullptr;
+    std::atomic<float>* pCycleGlide_ = nullptr;
     std::atomic<float>* pPersistence_ = nullptr;
     std::atomic<float>* pThickness_ = nullptr;
     std::atomic<float>* pTraceStyle_ = nullptr;
@@ -66,6 +67,7 @@ private:
 
     float smoothedPeak_ = 0.0001f;
     float smoothedPeriodSamples_ = 0.0f;
+    double lastTickMs_ = 0.0;
     bool displayPrimed_ = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundShapeView)

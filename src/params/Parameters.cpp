@@ -41,6 +41,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::String {}));
 
     layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::cycleGlide, 1 },
+        "Cycle Glide",
+        Range { 0.0f, 4.0f, 0.01f },
+        0.50f,
+        juce::String { "s" }));
+
+    layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::persistence, 1 },
         "Trail",
         Range { 0.0f, 0.96f, 0.001f },

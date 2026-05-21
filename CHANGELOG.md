@@ -14,3 +14,4 @@ All notable changes to this project will be documented in this file.
 - Polished the panel into Signal, Look, and Record rows with quieter accent chrome, compact color dots, fixed disabled advanced controls, an Aspect label, two-decimal slider readouts, and recording timecode.
 - Added section dividers, aligned the Record row control height with the rest of the panel, and moved the hover-only panel chevron farther from the panel edge.
 - Smoothed large period changes so the Sound Shape view glides between cycle spans instead of snapping between zoom levels.
+- Added a Cycle Glide parameter and Signal-row Glide control, ranging from instant cycle-span changes to 4-second transitions.

@@ -11,7 +11,7 @@ Current scaffold includes:
 - JUCE 8 CMake plug-in target: AU, VST3, and Standalone.
 - Pass-through `PluginProcessor` with `ScopeFeed` audio-to-UI handoff.
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
-- Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, line styling, recording, and a generic source window. The panel can be hidden with an autohiding hover toggle.
+- Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, line styling, cycle-span glide control, recording, and a generic source window. The panel can be hidden with an autohiding hover toggle.
 - Default appearance is white clean trace, transparent background, no trail.
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha.
 - Docs, git metadata, license, and project handoff files.
@@ -26,7 +26,7 @@ Verification:
 
 ## Next Steps
 
-1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, line-style changes update preset values without moving controls, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov`, Transparent records alpha as expected, and Source Window opens and updates.
+1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, Glide ranges from instant cycle-span changes to slow transitions, line-style changes update preset values without moving controls, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov`, Transparent records alpha as expected, and Source Window opens and updates.
 2. Install `pluginval` if needed and validate the VST3.
 3. Decide whether v0.2 should add Syphon/NDI/virtual-camera output beyond Window Capture/source capture.
 

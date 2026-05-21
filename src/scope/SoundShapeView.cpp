@@ -64,20 +64,22 @@ namespace
         return 0;
     }
 
-    float updateSmoothedPeriod(float smoothed, int rawPeriod) noexcept
+    float updateSmoothedPeriod(float smoothed, int rawPeriod,
+                               float glideSeconds, double elapsedSeconds) noexcept
     {
         if (rawPeriod < 2)
             return smoothed;
 
-        if (smoothed <= 0.0f)
+        if (smoothed <= 0.0f || glideSeconds <= 0.0f)
             return static_cast<float>(rawPeriod);
 
-        const float ratio = static_cast<float>(rawPeriod) / smoothed;
-        if (ratio < 0.8f || ratio > 1.25f)
-            // Large period changes are visual zoom changes, so ease them instead of snapping.
-            return smoothed + 0.035f * (static_cast<float>(rawPeriod) - smoothed);
-
-        return 0.86f * smoothed + 0.14f * static_cast<float>(rawPeriod);
+        elapsedSeconds = juce::jlimit(1.0 / 240.0, 0.1, elapsedSeconds);
+        // Treat the parameter as an approximate settle time, not a raw one-pole time constant.
+        const double timeConstant = juce::jmax(0.01, static_cast<double>(glideSeconds) * 0.25);
+        const float alpha = juce::jlimit(0.0f, 1.0f,
+                                         static_cast<float>(1.0 - std::exp(-elapsedSeconds
+                                                                           / timeConstant)));
+        return smoothed + alpha * (static_cast<float>(rawPeriod) - smoothed);
     }
 
     float sampleLinear(const float* src, int n, float pos) noexcept
@@ -185,6 +187,7 @@ SoundShapeView::SoundShapeView(const ScopeFeed& feed,
     pAmplitudeDb_ = apvts_.getRawParameterValue(ParamID::amplitudeDb);
     pFreeze_ = apvts_.getRawParameterValue(ParamID::freeze);
     pSmoothing_ = apvts_.getRawParameterValue(ParamID::smoothing);
+    pCycleGlide_ = apvts_.getRawParameterValue(ParamID::cycleGlide);
     pPersistence_ = apvts_.getRawParameterValue(ParamID::persistence);
     pThickness_ = apvts_.getRawParameterValue(ParamID::thickness);
     pTraceStyle_ = apvts_.getRawParameterValue(ParamID::traceStyle);
@@ -253,6 +256,11 @@ bool SoundShapeView::hasTransparentBackground() const noexcept
 
 void SoundShapeView::tick()
 {
+    const double nowMs = juce::Time::getMillisecondCounterHiRes();
+    const double elapsedSeconds = lastTickMs_ > 0.0 ? (nowMs - lastTickMs_) / 1000.0
+                                                    : 1.0 / 60.0;
+    lastTickMs_ = nowMs;
+
     renderOptions_.bgBrightness = pBgBrightness_->load(std::memory_order_relaxed);
     renderOptions_.bgHueDeg = pBgHue_->load(std::memory_order_relaxed);
     renderOptions_.bgSaturation = pBgSaturation_->load(std::memory_order_relaxed);
@@ -317,7 +325,12 @@ void SoundShapeView::tick()
     const int rawPeriod = estimatePeriodYIN(scratchM_.data(), readN, minLag, maxLag);
 
     if (rawPeriod >= 2)
-        smoothedPeriodSamples_ = updateSmoothedPeriod(smoothedPeriodSamples_, rawPeriod);
+    {
+        const float glideSeconds = juce::jlimit(0.0f, 4.0f,
+                                                pCycleGlide_->load(std::memory_order_relaxed));
+        smoothedPeriodSamples_ = updateSmoothedPeriod(smoothedPeriodSamples_, rawPeriod,
+                                                      glideSeconds, elapsedSeconds);
+    }
 
     int cycleCount = 0;
     if (smoothedPeriodSamples_ >= 2.0f)

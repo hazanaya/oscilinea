@@ -10,6 +10,7 @@ namespace ParamID
     inline constexpr const char* amplitudeDb   = "amplitude_db";
     inline constexpr const char* freeze        = "freeze";
     inline constexpr const char* smoothing     = "shape_smoothing";
+    inline constexpr const char* cycleGlide    = "cycle_glide_seconds";
     inline constexpr const char* persistence   = "persistence";
     inline constexpr const char* thickness     = "thickness";
     inline constexpr const char* traceStyle    = "trace_style";

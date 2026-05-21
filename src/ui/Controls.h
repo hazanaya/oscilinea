@@ -103,6 +103,8 @@ private:
     juce::Label levelLabel_;
     juce::Slider smoothingSlider_;
     juce::Label smoothingLabel_;
+    juce::Slider cycleGlideSlider_;
+    juce::Label cycleGlideLabel_;
     juce::Slider persistenceSlider_;
     juce::Label persistenceLabel_;
     juce::Slider thicknessSlider_;
@@ -126,6 +128,7 @@ private:
     std::unique_ptr<ComboAttachment> lineStyleAtt_;
     std::unique_ptr<SliderAttachment> levelAtt_;
     std::unique_ptr<SliderAttachment> smoothingAtt_;
+    std::unique_ptr<SliderAttachment> cycleGlideAtt_;
     std::unique_ptr<SliderAttachment> persistenceAtt_;
     std::unique_ptr<SliderAttachment> thicknessAtt_;
     std::unique_ptr<SliderAttachment> opacityAtt_;

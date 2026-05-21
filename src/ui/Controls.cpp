@@ -101,6 +101,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     configureLabel(lineStyleLabel_, "Line");
     configureLabel(levelLabel_, "Level");
     configureLabel(smoothingLabel_, "Smooth");
+    configureLabel(cycleGlideLabel_, "Glide");
     configureLabel(persistenceLabel_, "Trail");
     configureLabel(thicknessLabel_, "Weight");
     configureLabel(opacityLabel_, "Opacity");
@@ -118,6 +119,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
 
     configureSlider(levelSlider_);
     configureSlider(smoothingSlider_);
+    configureSlider(cycleGlideSlider_);
     configureSlider(persistenceSlider_);
     configureSlider(thicknessSlider_);
     configureSlider(opacitySlider_);
@@ -145,6 +147,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     lineStyleAtt_ = std::make_unique<ComboAttachment>(apvts_, ParamID::traceStyle, lineStyleCombo_);
     levelAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::amplitudeDb, levelSlider_);
     smoothingAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::smoothing, smoothingSlider_);
+    cycleGlideAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::cycleGlide, cycleGlideSlider_);
     persistenceAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::persistence, persistenceSlider_);
     thicknessAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::thickness, thicknessSlider_);
     opacityAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::traceOpacity, opacitySlider_);
@@ -153,6 +156,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
 
     configureSliderText(levelSlider_);
     configureSliderText(smoothingSlider_);
+    configureSliderText(cycleGlideSlider_);
     configureSliderText(persistenceSlider_);
     configureSliderText(thicknessSlider_);
     configureSliderText(opacitySlider_);
@@ -559,9 +563,10 @@ void ControlPanel::resized()
     if (signalRow.getWidth() > contentGap)
         signalRow.removeFromRight(contentGap);
 
-    const int signalSliderW = signalRow.getWidth() / 3;
+    const int signalSliderW = signalRow.getWidth() / 4;
     layoutLabeled(signalRow.removeFromLeft(signalSliderW).reduced(2, 0), levelLabel_, levelSlider_);
     layoutLabeled(signalRow.removeFromLeft(signalSliderW).reduced(2, 0), smoothingLabel_, smoothingSlider_);
+    layoutLabeled(signalRow.removeFromLeft(signalSliderW).reduced(2, 0), cycleGlideLabel_, cycleGlideSlider_);
     layoutLabeled(signalRow.reduced(2, 0), persistenceLabel_, persistenceSlider_);
 
     takeSection(lookRow, lookSectionLabel_);
