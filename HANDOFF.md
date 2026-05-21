@@ -11,8 +11,8 @@ Current scaffold includes:
 - JUCE 8 CMake plug-in target: AU, VST3, and Standalone.
 - Pass-through `PluginProcessor` with `ScopeFeed` audio-to-UI handoff.
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
-- System-style bottom panel for display controls, recording, and an OBS source window.
-- macOS AVFoundation `.mov` recorder.
+- System-style bottom panel for display controls, color picking, line styling, recording, and an OBS source window.
+- macOS AVFoundation `.mov` recorder. Record opens a save dialog. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha.
 - Docs, git metadata, license, and project handoff files.
 
 Verification:
@@ -25,7 +25,7 @@ Verification:
 
 ## Next Steps
 
-1. Smoke test Standalone: confirm audio pass-through, Record writes a playable `.mov`, and OBS Window opens and updates.
+1. Smoke test Standalone/Logic: confirm audio pass-through, Record prompts for a destination and writes a playable `.mov`, color pickers update the view, Transparent records alpha as expected, and OBS Window opens and updates.
 2. Install `pluginval` if needed and validate the VST3.
 3. Decide whether v0.2 should add Syphon/NDI/virtual-camera output beyond OBS Window Capture.
 

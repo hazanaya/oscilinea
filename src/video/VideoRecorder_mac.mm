@@ -39,6 +39,7 @@ struct VideoRecorder::Impl
     int fps = 30;
     int64_t frameIndex = 0;
     bool recording = false;
+    bool preserveAlpha = false;
 };
 
 VideoRecorder::VideoRecorder()
@@ -62,7 +63,7 @@ bool VideoRecorder::isRecording() const noexcept
     return impl_->recording;
 }
 
-juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int height, int fps)
+juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int height, int fps, bool preserveAlpha)
 {
     if (impl_->recording)
         return juce::Result::fail("Recording is already running.");
@@ -94,8 +95,9 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
             AVVideoAverageBitRateKey: @(juce::jmax(2000000, width * height * 6))
         };
 
+        NSString* codec = preserveAlpha ? AVVideoCodecTypeAppleProRes4444 : AVVideoCodecTypeH264;
         NSDictionary* settings = @{
-            AVVideoCodecKey: AVVideoCodecTypeH264,
+            AVVideoCodecKey: codec,
             AVVideoWidthKey: @(width),
             AVVideoHeightKey: @(height),
             AVVideoCompressionPropertiesKey: compression
@@ -130,6 +132,7 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
     impl_->height = height;
     impl_->fps = fps;
     impl_->frameIndex = 0;
+    impl_->preserveAlpha = preserveAlpha;
     impl_->recording = true;
     return juce::Result::ok();
 }
@@ -168,7 +171,7 @@ juce::Result VideoRecorder::addFrame(const juce::Image& image)
         const auto* srcRow = src.getLinePointer(y);
         auto* dstRow = dstBase + y * dstStride;
 
-        if (src.pixelStride == 4)
+        if (src.pixelStride == 4 && impl_->preserveAlpha)
         {
             std::memcpy(dstRow, srcRow, static_cast<std::size_t>(impl_->width * 4));
         }
@@ -180,7 +183,9 @@ juce::Result VideoRecorder::addFrame(const juce::Image& image)
                 dstRow[x * 4 + 0] = c.getBlue();
                 dstRow[x * 4 + 1] = c.getGreen();
                 dstRow[x * 4 + 2] = c.getRed();
-                dstRow[x * 4 + 3] = 255;
+                dstRow[x * 4 + 3] = impl_->preserveAlpha
+                                    ? static_cast<unsigned char>(c.getAlpha())
+                                    : 255;
             }
         }
     }

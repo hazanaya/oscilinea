@@ -2,13 +2,15 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
 
 #include <functional>
 #include <memory>
 
 namespace SoundShape {
 
-class ControlPanel : public juce::Component
+class ControlPanel : public juce::Component,
+                     private juce::ChangeListener
 {
 public:
     explicit ControlPanel(juce::AudioProcessorValueTreeState& apvts);
@@ -21,25 +23,48 @@ public:
     void setSourceWindowCallback(std::function<void()> callback);
     void setRecording(bool recording);
     void setSourceWindowOpen(bool open);
+    void refreshFromParameters();
 
     int getCaptureFps() const;
     int getSourceAspectIndex() const;
 
 private:
+    enum class ColourTarget
+    {
+        Trace,
+        Background
+    };
+
     void configureSlider(juce::Slider& slider);
     void configureLabel(juce::Label& label, const juce::String& text);
+    void showColourPicker(ColourTarget target);
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
+    float getFloatParam(const juce::String& paramID, float fallback) const;
+    bool getBoolParam(const juce::String& paramID, bool fallback) const;
+    void setFloatParam(const juce::String& paramID, float value);
+
+    juce::Colour getTraceColour() const;
+    juce::Colour getBackgroundColour() const;
+    void updateColourButtons();
 
     juce::AudioProcessorValueTreeState& apvts_;
 
     juce::ToggleButton autoGainButton_ { "Auto Gain" };
     juce::ToggleButton freezeButton_ { "Freeze" };
-    juce::TextButton recordButton_ { "Record" };
+    juce::ToggleButton transparentButton_ { "Transparent" };
+    juce::TextButton recordButton_ { "Record..." };
     juce::TextButton sourceWindowButton_ { "OBS Window" };
 
     juce::ComboBox fpsCombo_;
     juce::Label fpsLabel_;
     juce::ComboBox sourceAspectCombo_;
     juce::Label sourceAspectLabel_;
+    juce::ComboBox lineStyleCombo_;
+    juce::Label lineStyleLabel_;
+
+    juce::TextButton traceColourButton_ { "Trace Color" };
+    juce::TextButton backgroundColourButton_ { "Background" };
 
     juce::Slider levelSlider_;
     juce::Label levelLabel_;
@@ -49,10 +74,12 @@ private:
     juce::Label persistenceLabel_;
     juce::Slider thicknessSlider_;
     juce::Label thicknessLabel_;
-    juce::Slider hueSlider_;
-    juce::Label hueLabel_;
-    juce::Slider backgroundSlider_;
-    juce::Label backgroundLabel_;
+    juce::Slider opacitySlider_;
+    juce::Label opacityLabel_;
+    juce::Slider glowSlider_;
+    juce::Label glowLabel_;
+    juce::Slider backgroundOpacitySlider_;
+    juce::Label backgroundOpacityLabel_;
 
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     using ButtonAttachment = juce::AudioProcessorValueTreeState::ButtonAttachment;
@@ -60,14 +87,19 @@ private:
 
     std::unique_ptr<ButtonAttachment> autoGainAtt_;
     std::unique_ptr<ButtonAttachment> freezeAtt_;
+    std::unique_ptr<ButtonAttachment> transparentAtt_;
     std::unique_ptr<ComboAttachment> fpsAtt_;
     std::unique_ptr<ComboAttachment> sourceAspectAtt_;
+    std::unique_ptr<ComboAttachment> lineStyleAtt_;
     std::unique_ptr<SliderAttachment> levelAtt_;
     std::unique_ptr<SliderAttachment> smoothingAtt_;
     std::unique_ptr<SliderAttachment> persistenceAtt_;
     std::unique_ptr<SliderAttachment> thicknessAtt_;
-    std::unique_ptr<SliderAttachment> hueAtt_;
-    std::unique_ptr<SliderAttachment> backgroundAtt_;
+    std::unique_ptr<SliderAttachment> opacityAtt_;
+    std::unique_ptr<SliderAttachment> glowAtt_;
+    std::unique_ptr<SliderAttachment> backgroundOpacityAtt_;
+
+    ColourTarget activeColourTarget_ = ColourTarget::Trace;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
 };

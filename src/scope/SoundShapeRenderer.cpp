@@ -14,9 +14,14 @@ namespace
         return h / 360.0f;
     }
 
-    juce::Colour traceColour(float hueDeg, bool darkBg)
+    juce::Colour traceColour(const RenderOptions& options, bool darkBg)
     {
-        return juce::Colour::fromHSV(hue01(hueDeg), 0.62f, darkBg ? 0.96f : 0.52f, 1.0f);
+        const float brightness = darkBg ? options.traceBrightness
+                                        : juce::jmin(options.traceBrightness, 0.72f);
+        return juce::Colour::fromHSV(hue01(options.traceHueDeg),
+                                     juce::jlimit(0.0f, 1.0f, options.traceSaturation),
+                                     juce::jlimit(0.0f, 1.0f, brightness),
+                                     juce::jlimit(0.05f, 1.0f, options.traceOpacity));
     }
 }
 
@@ -24,8 +29,13 @@ void SoundShapeRenderer::drawBackground(juce::Graphics& g,
                                         juce::Rectangle<int>,
                                         const RenderOptions& options) const
 {
-    const float bg = juce::jlimit(0.0f, 1.0f, options.bgBrightness);
-    g.fillAll(juce::Colour::greyLevel(bg));
+    const auto bg = juce::Colour::fromHSV(hue01(options.bgHueDeg),
+                                          juce::jlimit(0.0f, 1.0f, options.bgSaturation),
+                                          juce::jlimit(0.0f, 1.0f, options.bgBrightness),
+                                          juce::jlimit(0.0f, 1.0f, options.bgAlpha));
+
+    if (bg.getFloatAlpha() > 0.0f)
+        g.fillAll(bg);
 }
 
 void SoundShapeRenderer::drawShape(juce::Graphics& g,
@@ -46,8 +56,8 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
     const float halfH = area.getHeight() * 0.48f;
     const float x0 = area.getX();
     const float xSpan = area.getWidth();
-    const bool darkBg = options.bgBrightness < 0.5f;
-    const auto colour = traceColour(options.traceHueDeg, darkBg);
+    const bool darkBg = options.bgBrightness < 0.5f || options.bgAlpha < 0.5f;
+    const auto colour = traceColour(options, darkBg);
 
     const int maxPoints = juce::jmax(2, static_cast<int>(xSpan * 4.0f));
     const int stride = juce::jmax(1, count / maxPoints);
@@ -72,16 +82,69 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
         }
     }
 
-    const auto stroke = juce::PathStrokeType(options.thickness,
-                                             juce::PathStrokeType::curved,
-                                             juce::PathStrokeType::rounded);
+    const float thickness = juce::jlimit(0.75f, 8.0f, options.thickness);
+    const float glow = juce::jlimit(0.0f, 1.0f, options.glowAmount);
+    const int style = juce::jlimit(0, 4, options.traceStyle);
 
-    g.setColour(colour.withAlpha(darkBg ? 0.18f : 0.12f));
-    g.strokePath(path, juce::PathStrokeType(options.thickness + 5.0f,
-                                            juce::PathStrokeType::curved,
-                                            juce::PathStrokeType::rounded));
-    g.setColour(colour);
-    g.strokePath(path, stroke);
+    auto strokePath = [&g, &path](juce::Colour c, float width,
+                                  juce::PathStrokeType::JointStyle joint,
+                                  juce::PathStrokeType::EndCapStyle cap)
+    {
+        g.setColour(c);
+        g.strokePath(path, juce::PathStrokeType(width, joint, cap));
+    };
+
+    switch (style)
+    {
+        case 0: // Clean
+            strokePath(colour, thickness, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+            break;
+
+        case 2: // Neon
+            strokePath(colour.withMultipliedAlpha(0.10f + glow * 0.20f),
+                       thickness + 16.0f * glow,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.withMultipliedAlpha(0.22f + glow * 0.18f),
+                       thickness + 7.0f * glow,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.brighter(0.45f), juce::jmax(0.75f, thickness * 0.42f),
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            break;
+
+        case 3: // Soft
+            strokePath(colour.withMultipliedAlpha(0.16f + glow * 0.18f),
+                       thickness + 8.0f + glow * 5.0f,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.withMultipliedAlpha(0.72f), thickness + 1.5f,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            break;
+
+        case 4: // Ink
+            strokePath(colour.withMultipliedAlpha(0.22f),
+                       thickness + 2.2f,
+                       juce::PathStrokeType::beveled,
+                       juce::PathStrokeType::butt);
+            strokePath(colour, thickness,
+                       juce::PathStrokeType::beveled,
+                       juce::PathStrokeType::butt);
+            break;
+
+        case 1: // Glow
+        default:
+            strokePath(colour.withMultipliedAlpha(0.14f + glow * 0.22f),
+                       thickness + 4.0f + glow * 8.0f,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour, thickness,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            break;
+    }
 }
 
 } // namespace SoundShape

@@ -14,6 +14,7 @@ SourceWindow::SourceWindow()
     setResizeLimits(360, 240, 3840, 3840);
 
     canvas_ = new Canvas();
+    canvas_->setOpaque(false);
     setContentOwned(canvas_, true);
     centreWithSize(1280, 720);
 }
@@ -51,9 +52,10 @@ void SourceWindow::Canvas::setFrame(const juce::Image& image)
 
 void SourceWindow::Canvas::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::black);
     if (frame_.isValid())
         g.drawImage(frame_, getLocalBounds().toFloat());
+    else
+        g.fillAll(juce::Colours::black);
 }
 
 } // namespace SoundShape

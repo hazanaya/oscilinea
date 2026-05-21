@@ -17,7 +17,7 @@ VideoRecorder::~VideoRecorder() = default;
 bool VideoRecorder::isAvailable() const noexcept { return false; }
 bool VideoRecorder::isRecording() const noexcept { return impl_->recording; }
 
-juce::Result VideoRecorder::start(const juce::File&, int, int, int)
+juce::Result VideoRecorder::start(const juce::File&, int, int, int, bool)
 {
     return juce::Result::fail("Video recording is only implemented on macOS.");
 }

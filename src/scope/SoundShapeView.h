@@ -25,6 +25,7 @@ public:
 
     void tick();
     juce::Image createSnapshot() const;
+    bool hasTransparentBackground() const noexcept;
 
 private:
     void drawTo(juce::Graphics& g, juce::Rectangle<int> bounds) const;
@@ -40,8 +41,17 @@ private:
     std::atomic<float>* pSmoothing_ = nullptr;
     std::atomic<float>* pPersistence_ = nullptr;
     std::atomic<float>* pThickness_ = nullptr;
+    std::atomic<float>* pTraceStyle_ = nullptr;
     std::atomic<float>* pTraceHue_ = nullptr;
+    std::atomic<float>* pTraceSaturation_ = nullptr;
+    std::atomic<float>* pTraceBrightness_ = nullptr;
+    std::atomic<float>* pTraceOpacity_ = nullptr;
+    std::atomic<float>* pGlowAmount_ = nullptr;
+    std::atomic<float>* pBgHue_ = nullptr;
+    std::atomic<float>* pBgSaturation_ = nullptr;
     std::atomic<float>* pBgBrightness_ = nullptr;
+    std::atomic<float>* pBgAlpha_ = nullptr;
+    std::atomic<float>* pTransparentBg_ = nullptr;
 
     SoundShapeRenderer renderer_;
     RenderOptions renderOptions_;

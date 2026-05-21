@@ -54,7 +54,7 @@ host audio buffer
 
 The v0.1 capture strategy has two layers:
 
-- **Recording:** the editor snapshots the rendered display at the selected frame rate and writes H.264 `.mov` through AVFoundation.
+- **Recording:** the editor snapshots the rendered display at the selected frame rate and writes `.mov` through AVFoundation. Opaque captures use H.264; transparent-background captures use ProRes 4444 so alpha can be preserved.
 - **OBS use:** the source window mirrors the display in a normal native window. OBS and similar tools can capture it via Window Capture.
 
 A true video-device source is deferred because it requires a macOS virtual camera, Syphon, NDI, or similar IPC layer outside ordinary AU/VST plug-in behavior.

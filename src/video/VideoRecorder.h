@@ -16,7 +16,7 @@ public:
     bool isAvailable() const noexcept;
     bool isRecording() const noexcept;
 
-    juce::Result start(const juce::File& outputFile, int width, int height, int fps);
+    juce::Result start(const juce::File& outputFile, int width, int height, int fps, bool preserveAlpha);
     juce::Result addFrame(const juce::Image& image);
     juce::Result stop();
 

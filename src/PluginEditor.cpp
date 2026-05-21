@@ -8,7 +8,7 @@ namespace SoundShape {
 
 namespace
 {
-    constexpr int panelHeight = 164;
+    constexpr int panelHeight = 220;
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
@@ -33,9 +33,9 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
     addAndMakeVisible(view_);
     addAndMakeVisible(controls_);
 
-    setSize(900, 640);
+    setSize(940, 720);
     setResizable(true, true);
-    setResizeLimits(560, 420, 3840, 2400);
+    setResizeLimits(640, 520, 3840, 2400);
 }
 
 PluginEditor::~PluginEditor()
@@ -77,11 +77,43 @@ void PluginEditor::toggleRecording()
         return;
     }
 
+    captureChooser_ = std::make_unique<juce::FileChooser>("Save Sound Shape recording",
+                                                          makeCaptureFile(),
+                                                          "*.mov");
+
+    const auto flags = juce::FileBrowserComponent::saveMode
+                       | juce::FileBrowserComponent::canSelectFiles
+                       | juce::FileBrowserComponent::warnAboutOverwriting;
+
+    captureChooser_->launchAsync(flags,
+        [safeThis = juce::Component::SafePointer<PluginEditor>(this)](const juce::FileChooser& chooser)
+        {
+            if (safeThis == nullptr)
+                return;
+
+            auto file = chooser.getResult();
+            if (file == juce::File{})
+            {
+                safeThis->captureChooser_.reset();
+                return;
+            }
+
+            if (! file.hasFileExtension(".mov"))
+                file = file.withFileExtension(".mov");
+
+            safeThis->beginRecordingAt(file);
+            safeThis->captureChooser_.reset();
+        });
+}
+
+void PluginEditor::beginRecordingAt(const juce::File& outputFile)
+{
     const auto snapshot = view_.createSnapshot();
-    const auto result = recorder_.start(makeCaptureFile(),
+    const auto result = recorder_.start(outputFile,
                                         snapshot.getWidth(),
                                         snapshot.getHeight(),
-                                        controls_.getCaptureFps());
+                                        controls_.getCaptureFps(),
+                                        view_.hasTransparentBackground());
     if (result.wasOk())
     {
         recorder_.addFrame(snapshot);
@@ -110,6 +142,8 @@ void PluginEditor::toggleSourceWindow()
 
 void PluginEditor::onVBlank()
 {
+    controls_.refreshFromParameters();
+
     if (huePtr_ != nullptr)
     {
         const float hue = huePtr_->load(std::memory_order_relaxed);

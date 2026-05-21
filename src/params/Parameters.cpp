@@ -54,6 +54,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         2.0f,
         juce::String { "px" }));
 
+    layout.add(std::make_unique<Choice>(
+        juce::ParameterID { ParamID::traceStyle, 1 },
+        "Line",
+        juce::StringArray { "Clean", "Glow", "Neon", "Soft", "Ink" },
+        1));
+
     layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::traceHue, 1 },
         "Hue",
@@ -62,11 +68,65 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::String { "deg" }));
 
     layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::traceSaturation, 1 },
+        "Saturation",
+        Range { 0.0f, 1.0f, 0.01f },
+        0.62f,
+        juce::String {}));
+
+    layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::traceBrightness, 1 },
+        "Brightness",
+        Range { 0.0f, 1.0f, 0.01f },
+        0.96f,
+        juce::String {}));
+
+    layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::traceOpacity, 1 },
+        "Opacity",
+        Range { 0.05f, 1.0f, 0.01f },
+        1.0f,
+        juce::String {}));
+
+    layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::glowAmount, 1 },
+        "Glow",
+        Range { 0.0f, 1.0f, 0.01f },
+        0.28f,
+        juce::String {}));
+
+    layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::bgHue, 1 },
+        "Background Hue",
+        Range { 0.0f, 360.0f, 1.0f },
+        0.0f,
+        juce::String { "deg" }));
+
+    layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::bgSaturation, 1 },
+        "Background Saturation",
+        Range { 0.0f, 1.0f, 0.01f },
+        0.0f,
+        juce::String {}));
+
+    layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::bgBrightness, 1 },
         "Background",
         Range { 0.0f, 1.0f, 0.01f },
         0.0f,
         juce::String {}));
+
+    layout.add(std::make_unique<Float>(
+        juce::ParameterID { ParamID::bgAlpha, 1 },
+        "Background Opacity",
+        Range { 0.0f, 1.0f, 0.01f },
+        1.0f,
+        juce::String {}));
+
+    layout.add(std::make_unique<Bool>(
+        juce::ParameterID { ParamID::transparentBg, 1 },
+        "Transparent",
+        false));
 
     layout.add(std::make_unique<Choice>(
         juce::ParameterID { ParamID::captureFps, 1 },

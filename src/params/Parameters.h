@@ -12,8 +12,17 @@ namespace ParamID
     inline constexpr const char* smoothing     = "shape_smoothing";
     inline constexpr const char* persistence   = "persistence";
     inline constexpr const char* thickness     = "thickness";
+    inline constexpr const char* traceStyle    = "trace_style";
     inline constexpr const char* traceHue      = "trace_hue";
+    inline constexpr const char* traceSaturation = "trace_saturation";
+    inline constexpr const char* traceBrightness = "trace_brightness";
+    inline constexpr const char* traceOpacity  = "trace_opacity";
+    inline constexpr const char* glowAmount    = "glow_amount";
+    inline constexpr const char* bgHue         = "bg_hue";
+    inline constexpr const char* bgSaturation  = "bg_saturation";
     inline constexpr const char* bgBrightness  = "bg_brightness";
+    inline constexpr const char* bgAlpha       = "bg_alpha";
+    inline constexpr const char* transparentBg = "transparent_background";
     inline constexpr const char* captureFps    = "capture_fps";
     inline constexpr const char* sourceAspect  = "source_aspect";
 }

@@ -178,7 +178,7 @@ SoundShapeView::SoundShapeView(const ScopeFeed& feed,
       sampleRateHz_(sampleRateAtomic),
       activeInputChannels_(activeInputChannelsAtomic)
 {
-    setOpaque(true);
+    setOpaque(false);
 
     pAutoGain_ = apvts_.getRawParameterValue(ParamID::autoGain);
     pAmplitudeDb_ = apvts_.getRawParameterValue(ParamID::amplitudeDb);
@@ -186,8 +186,17 @@ SoundShapeView::SoundShapeView(const ScopeFeed& feed,
     pSmoothing_ = apvts_.getRawParameterValue(ParamID::smoothing);
     pPersistence_ = apvts_.getRawParameterValue(ParamID::persistence);
     pThickness_ = apvts_.getRawParameterValue(ParamID::thickness);
+    pTraceStyle_ = apvts_.getRawParameterValue(ParamID::traceStyle);
     pTraceHue_ = apvts_.getRawParameterValue(ParamID::traceHue);
+    pTraceSaturation_ = apvts_.getRawParameterValue(ParamID::traceSaturation);
+    pTraceBrightness_ = apvts_.getRawParameterValue(ParamID::traceBrightness);
+    pTraceOpacity_ = apvts_.getRawParameterValue(ParamID::traceOpacity);
+    pGlowAmount_ = apvts_.getRawParameterValue(ParamID::glowAmount);
+    pBgHue_ = apvts_.getRawParameterValue(ParamID::bgHue);
+    pBgSaturation_ = apvts_.getRawParameterValue(ParamID::bgSaturation);
     pBgBrightness_ = apvts_.getRawParameterValue(ParamID::bgBrightness);
+    pBgAlpha_ = apvts_.getRawParameterValue(ParamID::bgAlpha);
+    pTransparentBg_ = apvts_.getRawParameterValue(ParamID::transparentBg);
 
     constexpr int initialScratch = 16384;
     scratchL_.assign(initialScratch, 0.0f);
@@ -236,10 +245,25 @@ juce::Image SoundShapeView::createSnapshot() const
     return image;
 }
 
+bool SoundShapeView::hasTransparentBackground() const noexcept
+{
+    return renderOptions_.bgAlpha < 0.999f;
+}
+
 void SoundShapeView::tick()
 {
     renderOptions_.bgBrightness = pBgBrightness_->load(std::memory_order_relaxed);
+    renderOptions_.bgHueDeg = pBgHue_->load(std::memory_order_relaxed);
+    renderOptions_.bgSaturation = pBgSaturation_->load(std::memory_order_relaxed);
+    renderOptions_.bgAlpha = pTransparentBg_->load(std::memory_order_relaxed) > 0.5f
+                             ? 0.0f
+                             : pBgAlpha_->load(std::memory_order_relaxed);
     renderOptions_.traceHueDeg = pTraceHue_->load(std::memory_order_relaxed);
+    renderOptions_.traceSaturation = pTraceSaturation_->load(std::memory_order_relaxed);
+    renderOptions_.traceBrightness = pTraceBrightness_->load(std::memory_order_relaxed);
+    renderOptions_.traceOpacity = pTraceOpacity_->load(std::memory_order_relaxed);
+    renderOptions_.glowAmount = pGlowAmount_->load(std::memory_order_relaxed);
+    renderOptions_.traceStyle = static_cast<int>(pTraceStyle_->load(std::memory_order_relaxed));
     renderOptions_.thickness = pThickness_->load(std::memory_order_relaxed);
 
     if (pFreeze_->load(std::memory_order_relaxed) > 0.5f)

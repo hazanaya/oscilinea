@@ -27,6 +27,7 @@ public:
 private:
     void onVBlank();
     void toggleRecording();
+    void beginRecordingAt(const juce::File& outputFile);
     void toggleSourceWindow();
     juce::File makeCaptureFile() const;
 
@@ -37,6 +38,7 @@ private:
     juce::VBlankAttachment vblank_;
     VideoRecorder recorder_;
     std::unique_ptr<SourceWindow> sourceWindow_;
+    std::unique_ptr<juce::FileChooser> captureChooser_;
 
     std::atomic<float>* huePtr_ = nullptr;
     float lastHue_ = -1.0f;
