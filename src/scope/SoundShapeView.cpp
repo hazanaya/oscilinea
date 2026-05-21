@@ -74,7 +74,8 @@ namespace
 
         const float ratio = static_cast<float>(rawPeriod) / smoothed;
         if (ratio < 0.8f || ratio > 1.25f)
-            return static_cast<float>(rawPeriod);
+            // Large period changes are visual zoom changes, so ease them instead of snapping.
+            return smoothed + 0.035f * (static_cast<float>(rawPeriod) - smoothed);
 
         return 0.86f * smoothed + 0.14f * static_cast<float>(rawPeriod);
     }
@@ -315,13 +316,6 @@ void SoundShapeView::tick()
     const int maxLag = juce::jmax(minLag + 4, static_cast<int>(sr / 30.0f));
     const int rawPeriod = estimatePeriodYIN(scratchM_.data(), readN, minLag, maxLag);
 
-    const bool periodJump = rawPeriod >= 2
-                            && smoothedPeriodSamples_ > 0.0f
-                            && (static_cast<float>(rawPeriod) / smoothedPeriodSamples_ < 0.8f
-                                || static_cast<float>(rawPeriod) / smoothedPeriodSamples_ > 1.25f);
-    if (periodJump)
-        displayPrimed_ = false;
-
     if (rawPeriod >= 2)
         smoothedPeriodSamples_ = updateSmoothedPeriod(smoothedPeriodSamples_, rawPeriod);
 
@@ -338,9 +332,11 @@ void SoundShapeView::tick()
     }
     else
     {
-        resampleLatestWindow(scratchM_.data(), readN, windowSamples, integrated_.data(), kShapePoints);
-        if (rawPeriod < 2)
-            smoothedPeriodSamples_ = 0.0f;
+        const int fallbackSpan = smoothedPeriodSamples_ >= 2.0f
+                                     ? juce::jlimit(2, readN,
+                                                    static_cast<int>(std::round(smoothedPeriodSamples_)))
+                                     : windowSamples;
+        resampleLatestWindow(scratchM_.data(), readN, fallbackSpan, integrated_.data(), kShapePoints);
     }
 
     const float smoothing = juce::jlimit(0.0f, 1.0f,
