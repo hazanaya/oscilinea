@@ -12,3 +12,4 @@ All notable changes to this project will be documented in this file.
 - Added a post-recording save dialog, trace/background color pickers, transparent background controls, ProRes 4444 alpha recording, and line style controls.
 - Refined the panel UX with capture-first defaults, neutral recording chrome, line-style presets, no rounded endpoint dots, dynamic advanced controls, and an autohiding panel toggle.
 - Polished the panel into Signal, Look, and Record rows with quieter accent chrome, compact color dots, fixed disabled advanced controls, an Aspect label, two-decimal slider readouts, and recording timecode.
+- Added section dividers, aligned the Record row control height with the rest of the panel, and moved the hover-only panel chevron farther from the panel edge.

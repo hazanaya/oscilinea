@@ -472,18 +472,30 @@ void ControlPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 
 void ControlPanel::paint(juce::Graphics& g)
 {
+    juce::Colour line;
     if (auto* lnf = systemLnf(*this))
     {
         g.fillAll(lnf->panelBackground());
-        g.setColour(lnf->separator());
+        line = lnf->separator();
     }
     else
     {
         g.fillAll(juce::Colour(0xfff2f2f4));
-        g.setColour(juce::Colour(0xffd1d1d6));
+        line = juce::Colour(0xffd1d1d6);
     }
 
+    g.setColour(line);
     g.drawHorizontalLine(0, 0.0f, static_cast<float>(getWidth()));
+
+    auto bounds = getLocalBounds().reduced(12, 8);
+    constexpr int rowGap = 8;
+    const int rowH = (bounds.getHeight() - 2 * rowGap) / 3;
+    const int y1 = bounds.getY() + rowH + rowGap / 2;
+    const int y2 = bounds.getY() + 2 * rowH + rowGap + rowGap / 2;
+
+    g.setColour(line.withAlpha(0.72f));
+    g.drawHorizontalLine(y1, 12.0f, static_cast<float>(getWidth() - 12));
+    g.drawHorizontalLine(y2, 12.0f, static_cast<float>(getWidth() - 12));
 }
 
 void ControlPanel::resized()
@@ -524,6 +536,11 @@ void ControlPanel::resized()
         control.setBounds(area);
     };
 
+    auto layoutVerbButton = [](juce::Rectangle<int> area, juce::Button& button)
+    {
+        button.setBounds(area.withTrimmedTop(labelH + 2));
+    };
+
     auto layoutSwitch = [](juce::Rectangle<int> area, juce::ToggleButton& button)
     {
         button.setBounds(area.withSizeKeepingCentre(area.getWidth(), 24));
@@ -561,7 +578,7 @@ void ControlPanel::resized()
     layoutLabeled(lookRow.reduced(2, 0), backgroundOpacityLabel_, backgroundOpacitySlider_);
 
     takeSection(recordRow, recordSectionLabel_);
-    recordButton_.setBounds(take(recordRow, 112).reduced(0, 6));
+    layoutVerbButton(take(recordRow, 112), recordButton_);
     layoutLabeled(take(recordRow, 78), fpsLabel_, fpsCombo_);
     layoutLabeled(take(recordRow, 98), sourceAspectLabel_, sourceAspectCombo_);
     layoutLabeled(take(recordRow, 118), sourceWindowLabel_, sourceWindowButton_);

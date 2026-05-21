@@ -71,8 +71,9 @@ void PluginEditor::resized()
     constexpr int toggleW = 24;
     constexpr int toggleH = 18;
     constexpr int margin = 10;
+    constexpr int visiblePanelOffset = 12;
     const int toggleY = panelVisible_
-                        ? fullBounds.getBottom() - panelHeight - toggleH - 2
+                        ? fullBounds.getBottom() - panelHeight - toggleH - visiblePanelOffset
                         : fullBounds.getBottom() - toggleH - margin;
     panelToggleButton_.setBounds(fullBounds.getRight() - toggleW - margin,
                                  toggleY,
