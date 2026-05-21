@@ -102,21 +102,69 @@ juce::File PluginEditor::makeCaptureFile() const
     auto folder = juce::File::getSpecialLocation(juce::File::userMoviesDirectory)
                     .getChildFile("Sound Shape Captures");
 
+    folder.createDirectory();
+
     const auto stamp = juce::Time::getCurrentTime().formatted("%Y-%m-%d %H.%M.%S");
-    return folder.getChildFile("Sound Shape " + stamp + ".mov");
+    return folder.getNonexistentChildFile("Sound Shape " + stamp, ".mov", true);
 }
 
 void PluginEditor::toggleRecording()
 {
     if (recorder_.isRecording())
     {
-        recorder_.stop();
+        const auto completedFile = activeCaptureFile_;
+        const auto result = recorder_.stop();
         controls_.setRecording(false);
+        activeCaptureFile_ = juce::File();
+
+        if (result.failed())
+        {
+            juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                        "Sound Shape",
+                                                        result.getErrorMessage(),
+                                                        this);
+            return;
+        }
+
+        promptToSaveCompletedRecording(completedFile);
         return;
     }
 
+    beginRecording();
+}
+
+void PluginEditor::beginRecording()
+{
+    const auto outputFile = makeCaptureFile();
+    const auto snapshot = view_.createSnapshot();
+    const auto result = recorder_.start(outputFile,
+                                        snapshot.getWidth(),
+                                        snapshot.getHeight(),
+                                        controls_.getCaptureFps(),
+                                        view_.hasTransparentBackground());
+    if (result.wasOk())
+    {
+        activeCaptureFile_ = outputFile;
+        recorder_.addFrame(snapshot);
+        nextCaptureMs_ = juce::Time::getMillisecondCounterHiRes()
+                         + 1000.0 / static_cast<double>(controls_.getCaptureFps());
+        controls_.setRecording(true);
+        return;
+    }
+
+    juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                "Sound Shape",
+                                                result.getErrorMessage(),
+                                                this);
+}
+
+void PluginEditor::promptToSaveCompletedRecording(const juce::File& captureFile)
+{
+    if (! captureFile.existsAsFile())
+        return;
+
     captureChooser_ = std::make_unique<juce::FileChooser>("Save Sound Shape recording",
-                                                          makeCaptureFile(),
+                                                          captureFile,
                                                           "*.mov");
 
     const auto flags = juce::FileBrowserComponent::saveMode
@@ -124,7 +172,8 @@ void PluginEditor::toggleRecording()
                        | juce::FileBrowserComponent::warnAboutOverwriting;
 
     captureChooser_->launchAsync(flags,
-        [safeThis = juce::Component::SafePointer<PluginEditor>(this)](const juce::FileChooser& chooser)
+        [safeThis = juce::Component::SafePointer<PluginEditor>(this),
+         captureFile](const juce::FileChooser& chooser)
         {
             if (safeThis == nullptr)
                 return;
@@ -139,26 +188,17 @@ void PluginEditor::toggleRecording()
             if (! file.hasFileExtension(".mov"))
                 file = file.withFileExtension(".mov");
 
-            safeThis->beginRecordingAt(file);
+            file.getParentDirectory().createDirectory();
+            if (! captureFile.replaceFileIn(file))
+            {
+                juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                            "Sound Shape",
+                                                            "The recording could not be moved to the selected location.",
+                                                            safeThis.getComponent());
+            }
+
             safeThis->captureChooser_.reset();
         });
-}
-
-void PluginEditor::beginRecordingAt(const juce::File& outputFile)
-{
-    const auto snapshot = view_.createSnapshot();
-    const auto result = recorder_.start(outputFile,
-                                        snapshot.getWidth(),
-                                        snapshot.getHeight(),
-                                        controls_.getCaptureFps(),
-                                        view_.hasTransparentBackground());
-    if (result.wasOk())
-    {
-        recorder_.addFrame(snapshot);
-        nextCaptureMs_ = juce::Time::getMillisecondCounterHiRes()
-                         + 1000.0 / static_cast<double>(controls_.getCaptureFps());
-        controls_.setRecording(true);
-    }
 }
 
 void PluginEditor::toggleSourceWindow()

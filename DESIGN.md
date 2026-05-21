@@ -2,7 +2,7 @@
 
 ## One-Line Pitch
 
-A focused macOS audio visualizer plug-in that renders the living shape of a sound and makes that display easy to record or capture in OBS.
+A focused macOS audio visualizer plug-in that renders the living shape of a sound and makes that display easy to record or capture in streaming and video tools.
 
 ## Vision
 
@@ -14,7 +14,7 @@ The panel should feel like system UI, not a themed hardware panel. The display c
 
 - **Pass-through audio.** No processing, no latency, no tonal change.
 - **Focused shape view.** One period-seeking mono display with robust fallback for noisy or polyphonic sources.
-- **Capture-first workflow.** Built-in `.mov` recording and a separate window suitable for OBS Window Capture.
+- **Capture-first workflow.** Built-in `.mov` recording and a separate source window suitable for Window Capture/source capture.
 - **Independent project.** Own source tree, git history, docs, plug-in codes, and build artifacts.
 - **Mac-first implementation.** AU, VST3, and Standalone from one JUCE 8 CMake project.
 

@@ -11,9 +11,9 @@ Current scaffold includes:
 - JUCE 8 CMake plug-in target: AU, VST3, and Standalone.
 - Pass-through `PluginProcessor` with `ScopeFeed` audio-to-UI handoff.
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
-- System-style bottom panel for display controls, color picking, line styling, recording, and an OBS source window. The panel can be hidden with an autohiding hover toggle.
+- System-style bottom panel for display controls, color picking, line styling, recording, and a generic source window. The panel can be hidden with an autohiding hover toggle.
 - Default appearance is white clean trace, transparent background, no trail.
-- macOS AVFoundation `.mov` recorder. Record opens a save dialog. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha.
+- macOS AVFoundation `.mov` recorder. Record starts immediately, and Stop opens the save dialog for the completed file. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha.
 - Docs, git metadata, license, and project handoff files.
 
 Verification:
@@ -26,13 +26,13 @@ Verification:
 
 ## Next Steps
 
-1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, line-style changes update the visible controls/preset values, Record prompts for a destination and writes a playable `.mov`, Transparent records alpha as expected, and OBS Window opens and updates.
+1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, line-style changes update the visible controls/preset values, Record starts instantly, Stop prompts for a destination and writes a playable `.mov`, Transparent records alpha as expected, and Source Window opens and updates.
 2. Install `pluginval` if needed and validate the VST3.
-3. Decide whether v0.2 should add Syphon/NDI/virtual-camera output beyond OBS Window Capture.
+3. Decide whether v0.2 should add Syphon/NDI/virtual-camera output beyond Window Capture/source capture.
 
 ## Gotchas
 
 - Do not change `PLUGIN_CODE=Sshp`, `PLUGIN_MANUFACTURER_CODE=Hzny`, or `BUNDLE_ID=com.hazaelanaya.soundshape` after release.
 - Do not rename parameter IDs once sessions may exist in user hosts.
 - Recording runs on the UI thread. Keep it out of `processBlock`.
-- The OBS source window is a practical capture surface, not a true system video device.
+- The source window is a practical capture surface, not a true system video device.

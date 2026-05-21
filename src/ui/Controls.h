@@ -58,8 +58,8 @@ private:
     juce::ToggleButton autoGainButton_ { "Auto Gain" };
     juce::ToggleButton freezeButton_ { "Freeze" };
     juce::ToggleButton transparentButton_ { "Transparent" };
-    juce::TextButton recordButton_ { "Record..." };
-    juce::TextButton sourceWindowButton_ { "OBS Window" };
+    juce::TextButton recordButton_ { "Record" };
+    juce::TextButton sourceWindowButton_ { "Source Window" };
 
     juce::ComboBox fpsCombo_;
     juce::Label fpsLabel_;

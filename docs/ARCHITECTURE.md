@@ -24,7 +24,7 @@ src/
 │   ├── Controls.*            - system-style control strip and attachments
 │   └── SystemLookAndFeel.*   - quiet macOS-like control drawing
 └── video/
-    ├── SourceWindow.*        - separate OBS Window Capture surface
+    ├── SourceWindow.*        - separate source-capture surface
     ├── VideoRecorder.h       - C++ recorder facade
     └── VideoRecorder_mac.mm  - AVFoundation writer
 ```
@@ -47,7 +47,7 @@ host audio buffer
 
 - `processBlock` is wait-free and allocation-free after `prepareToPlay`.
 - `ScopeFeed` writes on the audio thread and reads on the message thread.
-- Pitch detection, smoothing, rendering, recording, and OBS-window updates run on the message thread.
+- Pitch detection, smoothing, rendering, recording, and source-window updates run on the message thread.
 - AVFoundation recording is intentionally not a real-time audio responsibility.
 
 ## Capture Model
@@ -55,7 +55,7 @@ host audio buffer
 The v0.1 capture strategy has two layers:
 
 - **Recording:** the editor snapshots the rendered display at the selected frame rate and writes `.mov` through AVFoundation. Opaque captures use H.264; transparent-background captures use ProRes 4444 so alpha can be preserved.
-- **OBS use:** the source window mirrors the display in a normal native window. OBS and similar tools can capture it via Window Capture.
+- **External capture use:** the source window mirrors the display in a normal native window. Streaming and video tools can capture it via Window Capture/source capture.
 
 A true video-device source is deferred because it requires a macOS virtual camera, Syphon, NDI, or similar IPC layer outside ordinary AU/VST plug-in behavior.
 

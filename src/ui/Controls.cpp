@@ -276,7 +276,7 @@ void ControlPanel::setSourceWindowCallback(std::function<void()> callback)
 
 void ControlPanel::setRecording(bool recording)
 {
-    recordButton_.setButtonText(recording ? "Stop" : "Record...");
+    recordButton_.setButtonText(recording ? "Stop" : "Record");
     recordButton_.setColour(juce::TextButton::buttonColourId,
                             recording ? juce::Colour(0xffd92d20) : juce::Colour(0xff8e8e93));
     recordButton_.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
@@ -284,7 +284,7 @@ void ControlPanel::setRecording(bool recording)
 
 void ControlPanel::setSourceWindowOpen(bool open)
 {
-    sourceWindowButton_.setButtonText(open ? "Hide OBS" : "OBS Window");
+    sourceWindowButton_.setButtonText(open ? "Hide Source" : "Source Window");
     sourceWindowButton_.setColour(juce::TextButton::buttonColourId,
                                   open ? juce::Colour(0xff6e6e73) : juce::Colours::transparentBlack);
 }

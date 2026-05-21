@@ -4,13 +4,13 @@
 
 - Build the independent Sound Shape plug-in.
 - Verify AU/VST3/Standalone builds.
-- Smoke test Record and OBS Window in Standalone.
+- Smoke test Record and Source Window in Standalone.
 
 ## Next
 
 - Add record status/path feedback that fits the system UI.
 - Add export-size controls if editor-size recording is not enough.
-- Evaluate Syphon or NDI as a stronger OBS/live-visuals bridge.
+- Evaluate Syphon or NDI as a stronger live-visuals bridge.
 
 ## Later
 

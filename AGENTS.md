@@ -15,7 +15,7 @@ This is a standalone JUCE plug-in project. Read this file before editing code.
 - Preserve the plug-in identity codes once released. `PLUGIN_CODE`, `PLUGIN_MANUFACTURER_CODE`, `BUNDLE_ID`, and parameter IDs are host/session contracts.
 - The audio thread is pass-through only. Do not allocate, lock, log, access files, record video, open windows, or trigger repaint from `processBlock`.
 - The only audio-to-UI handoff is `SoundShape::ScopeFeed`, a lock-free latest-sample ring buffer.
-- UI capture, video recording, and OBS source-window updates run on the message thread from the editor vblank callback.
+- UI capture, video recording, and source-window updates run on the message thread from the editor vblank callback.
 - Update [CHANGELOG.md](CHANGELOG.md) for user-visible changes and [HANDOFF.md](HANDOFF.md) at the end of a session.
 - Add a short ADR in `docs/decisions/` for non-trivial architecture or product decisions.
 

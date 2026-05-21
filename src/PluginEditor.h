@@ -50,7 +50,8 @@ private:
     void updatePanelToggleChrome(bool hovered);
     void onVBlank();
     void toggleRecording();
-    void beginRecordingAt(const juce::File& outputFile);
+    void beginRecording();
+    void promptToSaveCompletedRecording(const juce::File& captureFile);
     void toggleSourceWindow();
     juce::File makeCaptureFile() const;
 
@@ -63,6 +64,7 @@ private:
     VideoRecorder recorder_;
     std::unique_ptr<SourceWindow> sourceWindow_;
     std::unique_ptr<juce::FileChooser> captureChooser_;
+    juce::File activeCaptureFile_;
 
     std::atomic<float>* huePtr_ = nullptr;
     float lastHue_ = -1.0f;
