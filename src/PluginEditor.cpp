@@ -26,36 +26,14 @@ void PanelToggleButton::paintButton(juce::Graphics& g,
                                     bool shouldDrawButtonAsHighlighted,
                                     bool shouldDrawButtonAsDown)
 {
-    const auto bounds = getLocalBounds().toFloat();
-    const auto lineWidth = juce::jmax(84.0f, bounds.getWidth() * (panelToggleVisibleWidthRatio / panelToggleHitWidthRatio));
-    const auto lineHeight = shouldDrawButtonAsDown ? 4.0f : 3.0f;
-    const auto lineBounds = juce::Rectangle<float>(lineWidth, lineHeight)
-                                .withCentre(bounds.getCentre());
-
-    if (hovering_ && ! hoverRevealActive_ && ! shouldDrawButtonAsDown)
-        return;
-
-    const float alpha = shouldDrawButtonAsDown ? 0.95f
-                      : shouldDrawButtonAsHighlighted ? 0.72f
-                                                       : 0.32f;
-
-    g.setColour(findColour(juce::TextButton::textColourOffId).withAlpha(alpha));
-    g.fillRoundedRectangle(lineBounds, lineHeight * 0.5f);
+    juce::ignoreUnused(g, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 }
 
 void PanelToggleButton::timerCallback()
 {
-    hoverRevealActive_ = false;
     stopTimer();
-    setAlpha(0.0f);
-    repaintParentArea();
-    repaint();
-}
-
-void PanelToggleButton::repaintParentArea()
-{
-    if (auto* parent = getParentComponent())
-        parent->repaint(getBounds());
+    if (onHoverExpired)
+        onHoverExpired();
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
@@ -82,6 +60,7 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
     panelToggleButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     panelToggleButton_.onClick = [this]() { setPanelVisible(! panelVisible_); };
     panelToggleButton_.onHoverChanged = [this](bool hovered) { updatePanelToggleChrome(hovered); };
+    panelToggleButton_.onHoverExpired = [this]() { hidePanelToggleLine(); };
     addAndMakeVisible(panelToggleButton_);
     setPanelVisible(true);
     updatePanelToggleChrome(false);
@@ -109,6 +88,25 @@ void PluginEditor::paint(juce::Graphics& g)
     g.fillAll(lookAndFeel_.panelBackground());
 }
 
+void PluginEditor::paintOverChildren(juce::Graphics& g)
+{
+    if (! panelToggleLineVisible_)
+        return;
+
+    const auto bounds = panelToggleButton_.getBounds().toFloat();
+    if (bounds.isEmpty())
+        return;
+
+    const auto lineWidth = juce::jmax(84.0f, bounds.getWidth() * (panelToggleVisibleWidthRatio / panelToggleHitWidthRatio));
+    constexpr float lineHeight = 3.0f;
+    const auto lineBounds = juce::Rectangle<float>(lineWidth, lineHeight)
+                                .withCentre(bounds.getCentre());
+    const float alpha = panelToggleHovered_ ? 0.72f : 0.32f;
+
+    g.setColour(lookAndFeel_.primaryText().withAlpha(alpha));
+    g.fillRoundedRectangle(lineBounds, lineHeight * 0.5f);
+}
+
 void PluginEditor::resized()
 {
     auto bounds = getLocalBounds();
@@ -127,25 +125,41 @@ void PluginEditor::resized()
                             ? fullBounds.getBottom() - panelHeight - panelToggleInsetFromPanel
                             : fullBounds.getBottom() - panelToggleInsetFromBottom;
     const int toggleY = lineCenterY - toggleH / 2;
+    repaintPanelToggleBounds();
     panelToggleButton_.setBounds(fullBounds.getCentreX() - toggleW / 2,
                                  toggleY,
                                  toggleW,
                                  toggleH);
+    repaintPanelToggleBounds();
 }
 
 void PluginEditor::setPanelVisible(bool visible)
 {
     panelVisible_ = visible;
     controls_.setVisible(visible);
+    panelToggleLineVisible_ = true;
     resized();
 }
 
 void PluginEditor::updatePanelToggleChrome(bool hovered)
 {
-    panelToggleButton_.setAlpha(hovered ? 1.0f : 0.82f);
-    panelToggleButton_.setColour(juce::TextButton::textColourOffId,
-                                 lookAndFeel_.primaryText());
-    panelToggleButton_.repaint();
+    panelToggleHovered_ = hovered;
+    panelToggleLineVisible_ = true;
+    repaintPanelToggleBounds();
+}
+
+void PluginEditor::hidePanelToggleLine()
+{
+    if (! panelToggleHovered_)
+        return;
+
+    panelToggleLineVisible_ = false;
+    repaintPanelToggleBounds();
+}
+
+void PluginEditor::repaintPanelToggleBounds()
+{
+    repaint(panelToggleButton_.getBounds().expanded(2));
 }
 
 juce::File PluginEditor::makeCaptureFile() const

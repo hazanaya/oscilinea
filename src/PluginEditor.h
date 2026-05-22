@@ -23,6 +23,7 @@ public:
     PanelToggleButton();
 
     std::function<void(bool)> onHoverChanged;
+    std::function<void()> onHoverExpired;
 
     void paintButton(juce::Graphics& g,
                      bool shouldDrawButtonAsHighlighted,
@@ -31,12 +32,7 @@ public:
     void mouseEnter(const juce::MouseEvent& event) override
     {
         juce::Button::mouseEnter(event);
-        hovering_ = true;
-        hoverRevealActive_ = true;
-        setAlpha(1.0f);
-        repaintParentArea();
         startTimer(1800);
-        repaint();
         if (onHoverChanged)
             onHoverChanged(true);
     }
@@ -45,21 +41,12 @@ public:
     {
         juce::Button::mouseExit(event);
         stopTimer();
-        hovering_ = false;
-        hoverRevealActive_ = true;
-        setAlpha(0.82f);
-        repaintParentArea();
-        repaint();
         if (onHoverChanged)
             onHoverChanged(false);
     }
 
 private:
     void timerCallback() override;
-    void repaintParentArea();
-
-    bool hoverRevealActive_ = true;
-    bool hovering_ = false;
 };
 
 class PluginEditor final : public juce::AudioProcessorEditor
@@ -69,11 +56,14 @@ public:
     ~PluginEditor() override;
 
     void paint(juce::Graphics& g) override;
+    void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
 
 private:
     void setPanelVisible(bool visible);
     void updatePanelToggleChrome(bool hovered);
+    void hidePanelToggleLine();
+    void repaintPanelToggleBounds();
     void onVBlank();
     void toggleRecording();
     void beginRecording();
@@ -99,6 +89,8 @@ private:
     double nextCaptureMs_ = 0.0;
     double recordStartMs_ = 0.0;
     int lastSourceAspect_ = -1;
+    bool panelToggleHovered_ = false;
+    bool panelToggleLineVisible_ = true;
     bool panelVisible_ = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
