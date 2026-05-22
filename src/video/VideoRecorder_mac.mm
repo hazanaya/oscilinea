@@ -145,8 +145,8 @@ juce::Result VideoRecorder::start(const juce::File& outputFile,
     const int audioTimeScale = juce::jlimit(8000, 192000, static_cast<int>(std::lround(audioSampleRate)));
 
     outputFile.getParentDirectory().createDirectory();
-    if (outputFile.existsAsFile())
-        outputFile.deleteFile();
+    if (outputFile.exists())
+        return juce::Result::fail("The recording destination already exists.");
 
     auto failStart = [&](const juce::String& message) -> juce::Result
     {

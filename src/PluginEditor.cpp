@@ -144,7 +144,8 @@ juce::File PluginEditor::makeCaptureFile() const
     folder.createDirectory();
 
     const auto stamp = juce::Time::getCurrentTime().formatted("%Y-%m-%d %H.%M.%S");
-    return folder.getNonexistentChildFile("Sound Shape " + stamp, ".mov", true);
+    const auto nonce = juce::Uuid().toString().substring(0, 8);
+    return folder.getChildFile("Sound Shape " + stamp + " " + nonce + ".mov");
 }
 
 void PluginEditor::toggleRecording()

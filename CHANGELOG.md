@@ -25,3 +25,4 @@ All notable changes to this project will be documented in this file.
 - Forced the panel handle timeout to clear stale pixels by hiding the whole handle component and repainting its parent area.
 - Moved the panel handle line into the editor overlay so the invisible hit target never leaves a stale line behind.
 - Restored the panel handle to the chevron-era alpha visibility model with a centered line inside the wider hit target.
+- Made recording temp files UUID-backed and prevented recorder start-up from deleting pre-existing destinations, so multiple instances can record concurrently without filename collisions.

@@ -15,6 +15,7 @@ Current scaffold includes:
 - Default appearance is a clean trace over a transparent background with no trail. Dark mode defaults to a white trace; light mode defaults to a dark neutral trace for contrast.
 - The Look row has a compact defaults menu. It can save the current appearance as the default for future new plug-in instances or reset back to built-in appearance defaults. Saved host sessions still reopen from their saved state.
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha. Recordings mux AAC audio for the signal passing through the plug-in.
+- Each recording uses a UUID-backed temporary filename in `~/Movies/Sound Shape Captures`, so separate plug-in instances can record at the same time without colliding.
 - Docs, git metadata, license, and project handoff files.
 
 Verification:
@@ -39,4 +40,5 @@ Verification:
 - Recording runs on the UI thread. Keep it out of `processBlock`.
 - The audio thread only copies into `AudioCaptureBuffer` while recording; keep AVFoundation and file work on the message thread.
 - Transparent recording uses ProRes 4444. Do not attach H.264-only compression properties, such as average bitrate, to the ProRes writer input; AVFoundation throws an Objective-C exception for that.
+- Do not delete an existing output path when starting a recording. Concurrent instances must never be able to remove another instance's active temp file.
 - The source window is a practical capture surface, not a true system video device.
