@@ -13,7 +13,8 @@ namespace
     constexpr float panelToggleVisibleWidthRatio = 0.20f;
     constexpr float panelToggleHitWidthRatio = 0.36f;
     constexpr int panelToggleHitHeight = 38;
-    constexpr int panelToggleBottomInset = 4;
+    constexpr int panelToggleInsetFromPanel = 8;
+    constexpr int panelToggleInsetFromBottom = 19;
 }
 
 PanelToggleButton::PanelToggleButton()
@@ -29,10 +30,13 @@ void PanelToggleButton::paintButton(juce::Graphics& g,
     const auto lineWidth = juce::jmax(84.0f, bounds.getWidth() * (panelToggleVisibleWidthRatio / panelToggleHitWidthRatio));
     const auto lineHeight = shouldDrawButtonAsDown ? 4.0f : 3.0f;
     const auto lineBounds = juce::Rectangle<float>(lineWidth, lineHeight)
-                                .withCentre(bounds.getCentre().withY(bounds.getBottom() - 12.0f));
+                                .withCentre(bounds.getCentre());
+
+    if (hovering_ && ! hoverRevealActive_ && ! shouldDrawButtonAsDown)
+        return;
 
     const float alpha = shouldDrawButtonAsDown ? 0.95f
-                      : shouldDrawButtonAsHighlighted ? (hoverRevealActive_ ? 0.72f : 0.0f)
+                      : shouldDrawButtonAsHighlighted ? 0.72f
                                                        : 0.32f;
 
     g.setColour(findColour(juce::TextButton::textColourOffId).withAlpha(alpha));
@@ -111,9 +115,10 @@ void PluginEditor::resized()
                                      520,
                                      static_cast<int>(static_cast<float>(fullBounds.getWidth()) * panelToggleHitWidthRatio));
     constexpr int toggleH = panelToggleHitHeight;
-    const int toggleY = panelVisible_
-                        ? fullBounds.getBottom() - panelHeight - toggleH + panelToggleBottomInset
-                        : fullBounds.getBottom() - toggleH;
+    const int lineCenterY = panelVisible_
+                            ? fullBounds.getBottom() - panelHeight - panelToggleInsetFromPanel
+                            : fullBounds.getBottom() - panelToggleInsetFromBottom;
+    const int toggleY = lineCenterY - toggleH / 2;
     panelToggleButton_.setBounds(fullBounds.getCentreX() - toggleW / 2,
                                  toggleY,
                                  toggleW,

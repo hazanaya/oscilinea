@@ -31,6 +31,7 @@ public:
     void mouseEnter(const juce::MouseEvent& event) override
     {
         juce::Button::mouseEnter(event);
+        hovering_ = true;
         hoverRevealActive_ = true;
         startTimer(1800);
         repaint();
@@ -42,6 +43,7 @@ public:
     {
         juce::Button::mouseExit(event);
         stopTimer();
+        hovering_ = false;
         hoverRevealActive_ = true;
         repaint();
         if (onHoverChanged)
@@ -52,6 +54,7 @@ private:
     void timerCallback() override;
 
     bool hoverRevealActive_ = true;
+    bool hovering_ = false;
 };
 
 class PluginEditor final : public juce::AudioProcessorEditor
