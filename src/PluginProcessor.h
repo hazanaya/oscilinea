@@ -4,6 +4,7 @@
 
 #include <atomic>
 
+#include "dsp/AudioCaptureBuffer.h"
 #include "dsp/ScopeFeed.h"
 #include "params/Parameters.h"
 
@@ -42,9 +43,13 @@ public:
     juce::AudioProcessorValueTreeState& getState() noexcept { return parameters_.getState(); }
     std::atomic<float>* getSampleRateAtomic() noexcept { return &sampleRateHz_; }
     std::atomic<int>* getActiveInputChannelsAtomic() noexcept { return &activeInputChannels_; }
+    void startAudioCapture(int numChannels) noexcept;
+    void stopAudioCapture() noexcept;
+    int readCapturedAudio(juce::AudioBuffer<float>& dest, int maxSamples);
 
 private:
     ScopeFeed scopeFeed_;
+    AudioCaptureBuffer audioCapture_;
     Parameters parameters_;
     std::atomic<float> sampleRateHz_ { 48000.0f };
     std::atomic<int> activeInputChannels_ { 2 };

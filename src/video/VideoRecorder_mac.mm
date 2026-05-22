@@ -1,7 +1,11 @@
 #include "VideoRecorder.h"
 
 #import <AVFoundation/AVFoundation.h>
+#import <AudioToolbox/AudioToolbox.h>
 #import <CoreVideo/CoreVideo.h>
+
+#include <cmath>
+#include <vector>
 
 namespace SoundShape {
 
@@ -31,6 +35,11 @@ namespace
                                     : "Video recording failed while preparing the encoder.";
     }
 
+    juce::String osStatusMessage(OSStatus status, const char* fallback)
+    {
+        return juce::String(fallback) + " (" + juce::String(static_cast<int>(status)) + ")";
+    }
+
     juce::Image fittedARGB(const juce::Image& source, int width, int height)
     {
         if (source.isValid()
@@ -52,13 +61,36 @@ struct VideoRecorder::Impl
 {
     AVAssetWriter* writer = nil;
     AVAssetWriterInput* input = nil;
+    AVAssetWriterInput* audioInput = nil;
     AVAssetWriterInputPixelBufferAdaptor* adaptor = nil;
+    CMAudioFormatDescriptionRef audioFormat = nullptr;
     int width = 0;
     int height = 0;
     int fps = 30;
     int64_t frameIndex = 0;
+    int64_t audioSampleIndex = 0;
+    int audioChannels = 0;
+    int audioTimeScale = 48000;
     bool recording = false;
     bool preserveAlpha = false;
+
+    void releaseAudioFormat() noexcept
+    {
+        if (audioFormat != nullptr)
+        {
+            CFRelease(audioFormat);
+            audioFormat = nullptr;
+        }
+    }
+
+    void clearHandles() noexcept
+    {
+        writer = nil;
+        input = nil;
+        audioInput = nil;
+        adaptor = nil;
+        releaseAudioFormat();
+    }
 };
 
 VideoRecorder::VideoRecorder()
@@ -70,6 +102,8 @@ VideoRecorder::~VideoRecorder()
 {
     if (isRecording())
         stop();
+
+    impl_->releaseAudioFormat();
 }
 
 bool VideoRecorder::isAvailable() const noexcept
@@ -82,7 +116,20 @@ bool VideoRecorder::isRecording() const noexcept
     return impl_->recording;
 }
 
-juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int height, int fps, bool preserveAlpha)
+bool VideoRecorder::canAcceptAudio() const noexcept
+{
+    return impl_->recording
+           && impl_->audioInput != nil
+           && impl_->audioInput.readyForMoreMediaData;
+}
+
+juce::Result VideoRecorder::start(const juce::File& outputFile,
+                                  int width,
+                                  int height,
+                                  int fps,
+                                  bool preserveAlpha,
+                                  double audioSampleRate,
+                                  int audioChannels)
 {
     if (impl_->recording)
         return juce::Result::fail("Recording is already running.");
@@ -93,6 +140,9 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
     width = width + (width % 2);
     height = height + (height % 2);
     fps = juce::jlimit(1, 120, fps);
+    audioChannels = juce::jlimit(0, 2, audioChannels);
+    const bool recordAudio = audioChannels > 0 && audioSampleRate >= 8000.0;
+    const int audioTimeScale = juce::jlimit(8000, 192000, static_cast<int>(std::lround(audioSampleRate)));
 
     outputFile.getParentDirectory().createDirectory();
     if (outputFile.existsAsFile())
@@ -100,9 +150,10 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
 
     auto failStart = [&](const juce::String& message) -> juce::Result
     {
-        impl_->writer = nil;
-        impl_->input = nil;
-        impl_->adaptor = nil;
+        if (impl_->writer != nil)
+            [impl_->writer cancelWriting];
+
+        impl_->clearHandles();
         outputFile.deleteFile();
         return juce::Result::fail(message);
     };
@@ -168,6 +219,52 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
 
             [impl_->writer addInput:impl_->input];
 
+            if (recordAudio)
+            {
+                NSDictionary* audioSettings = @{
+                    AVFormatIDKey: @(kAudioFormatMPEG4AAC),
+                    AVSampleRateKey: @(audioSampleRate),
+                    AVNumberOfChannelsKey: @(audioChannels),
+                    AVEncoderBitRateKey: @(audioChannels > 1 ? 192000 : 96000)
+                };
+
+                impl_->audioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio
+                                                                        outputSettings:audioSettings];
+                if (impl_->audioInput == nil)
+                    return failStart("Could not create the audio input.");
+
+                impl_->audioInput.expectsMediaDataInRealTime = YES;
+
+                if (! [impl_->writer canAddInput:impl_->audioInput])
+                    return failStart("AVAssetWriter cannot add the audio input.");
+
+                [impl_->writer addInput:impl_->audioInput];
+
+                AudioStreamBasicDescription description {};
+                description.mSampleRate = audioSampleRate;
+                description.mFormatID = kAudioFormatLinearPCM;
+                description.mFormatFlags = kAudioFormatFlagIsFloat
+                                           | kAudioFormatFlagIsPacked
+                                           | kAudioFormatFlagIsNonInterleaved
+                                           | kAudioFormatFlagsNativeEndian;
+                description.mBytesPerPacket = sizeof(float);
+                description.mFramesPerPacket = 1;
+                description.mBytesPerFrame = sizeof(float);
+                description.mChannelsPerFrame = static_cast<UInt32>(audioChannels);
+                description.mBitsPerChannel = sizeof(float) * 8;
+
+                const auto status = CMAudioFormatDescriptionCreate(kCFAllocatorDefault,
+                                                                   &description,
+                                                                   0,
+                                                                   nullptr,
+                                                                   0,
+                                                                   nullptr,
+                                                                   nullptr,
+                                                                   &impl_->audioFormat);
+                if (status != noErr || impl_->audioFormat == nullptr)
+                    return failStart(osStatusMessage(status, "Could not create the audio format."));
+            }
+
             if (! [impl_->writer startWriting])
             {
                 const auto message = impl_->writer.error != nil
@@ -188,6 +285,9 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
     impl_->height = height;
     impl_->fps = fps;
     impl_->frameIndex = 0;
+    impl_->audioSampleIndex = 0;
+    impl_->audioChannels = recordAudio ? audioChannels : 0;
+    impl_->audioTimeScale = audioTimeScale;
     impl_->preserveAlpha = preserveAlpha;
     impl_->recording = true;
     return juce::Result::ok();
@@ -260,6 +360,79 @@ juce::Result VideoRecorder::addFrame(const juce::Image& image)
     return juce::Result::ok();
 }
 
+juce::Result VideoRecorder::addAudioSamples(const juce::AudioBuffer<float>& buffer, int numSamples)
+{
+    if (! impl_->recording || impl_->audioInput == nil || impl_->audioFormat == nullptr)
+        return juce::Result::ok();
+
+    if (numSamples <= 0)
+        return juce::Result::ok();
+
+    if (! impl_->audioInput.readyForMoreMediaData)
+        return juce::Result::ok();
+
+    if (buffer.getNumChannels() < impl_->audioChannels)
+        return juce::Result::fail("Audio capture channel count changed during recording.");
+
+    CMSampleBufferRef sampleBuffer = nullptr;
+
+    const CMSampleTimingInfo timing {
+        CMTimeMake(1, impl_->audioTimeScale),
+        CMTimeMake(impl_->audioSampleIndex, impl_->audioTimeScale),
+        kCMTimeInvalid
+    };
+
+    auto status = CMSampleBufferCreate(kCFAllocatorDefault,
+                                       nullptr,
+                                       false,
+                                       nullptr,
+                                       nullptr,
+                                       impl_->audioFormat,
+                                       numSamples,
+                                       1,
+                                       &timing,
+                                       0,
+                                       nullptr,
+                                       &sampleBuffer);
+    if (status != noErr || sampleBuffer == nullptr)
+        return juce::Result::fail(osStatusMessage(status, "Could not create an audio sample buffer."));
+
+    const auto listSize = sizeof(AudioBufferList)
+                          + (static_cast<std::size_t>(juce::jmax(impl_->audioChannels, 1)) - 1)
+                                * sizeof(AudioBuffer);
+    std::vector<unsigned char> storage(listSize, 0);
+    auto* audioBufferList = reinterpret_cast<AudioBufferList*>(storage.data());
+    audioBufferList->mNumberBuffers = static_cast<UInt32>(impl_->audioChannels);
+
+    for (int ch = 0; ch < impl_->audioChannels; ++ch)
+    {
+        auto& entry = audioBufferList->mBuffers[ch];
+        entry.mNumberChannels = 1;
+        entry.mDataByteSize = static_cast<UInt32>(numSamples * static_cast<int>(sizeof(float)));
+        entry.mData = const_cast<float*>(buffer.getReadPointer(ch));
+    }
+
+    status = CMSampleBufferSetDataBufferFromAudioBufferList(sampleBuffer,
+                                                            kCFAllocatorDefault,
+                                                            kCFAllocatorDefault,
+                                                            0,
+                                                            audioBufferList);
+    if (status != noErr)
+    {
+        CFRelease(sampleBuffer);
+        return juce::Result::fail(osStatusMessage(status, "Could not attach audio samples."));
+    }
+
+    const BOOL appended = [impl_->audioInput appendSampleBuffer:sampleBuffer];
+    CFRelease(sampleBuffer);
+
+    if (! appended)
+        return juce::Result::fail("Could not append audio samples.");
+
+    impl_->audioSampleIndex += numSamples;
+    return juce::Result::ok();
+}
+
 juce::Result VideoRecorder::stop()
 {
     if (! impl_->recording)
@@ -269,6 +442,9 @@ juce::Result VideoRecorder::stop()
 
     if (impl_->input != nil)
         [impl_->input markAsFinished];
+
+    if (impl_->audioInput != nil)
+        [impl_->audioInput markAsFinished];
 
     __block BOOL success = YES;
     dispatch_semaphore_t sema = dispatch_semaphore_create(0);
@@ -280,9 +456,7 @@ juce::Result VideoRecorder::stop()
 
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
 
-    impl_->writer = nil;
-    impl_->input = nil;
-    impl_->adaptor = nil;
+    impl_->clearHandles();
 
     return success ? juce::Result::ok()
                    : juce::Result::fail("AVAssetWriter did not finish successfully.");

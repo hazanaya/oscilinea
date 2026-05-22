@@ -51,6 +51,7 @@ private:
     void onVBlank();
     void toggleRecording();
     void beginRecording();
+    void drainCapturedAudio(int maxChunks, bool showWarning = true);
     void promptToSaveCompletedRecording(const juce::File& captureFile);
     void toggleSourceWindow();
     juce::File makeCaptureFile() const;
@@ -62,6 +63,7 @@ private:
     PanelToggleButton panelToggleButton_;
     juce::VBlankAttachment vblank_;
     VideoRecorder recorder_;
+    juce::AudioBuffer<float> capturedAudioScratch_;
     std::unique_ptr<SourceWindow> sourceWindow_;
     std::unique_ptr<juce::FileChooser> captureChooser_;
     juce::File activeCaptureFile_;

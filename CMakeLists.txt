@@ -43,6 +43,7 @@ target_sources(SoundShape PRIVATE
     src/PluginProcessor.h
     src/PluginEditor.cpp
     src/PluginEditor.h
+    src/dsp/AudioCaptureBuffer.h
     src/dsp/ScopeFeed.h
     src/params/Parameters.cpp
     src/params/Parameters.h
@@ -63,6 +64,7 @@ if(APPLE)
     set_source_files_properties(src/video/VideoRecorder_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
     target_link_libraries(SoundShape PRIVATE
         "-framework AVFoundation"
+        "-framework AudioToolbox"
         "-framework CoreMedia"
         "-framework CoreVideo")
 else()

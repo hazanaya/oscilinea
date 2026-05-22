@@ -14,7 +14,7 @@ The panel should feel like system UI, not a themed hardware panel. The display c
 
 - **Pass-through audio.** No processing, no latency, no tonal change.
 - **Focused shape view.** One period-seeking mono display with robust fallback for noisy or polyphonic sources.
-- **Capture-first workflow.** Built-in `.mov` recording and a separate source window suitable for Window Capture/source capture.
+- **Capture-first workflow.** Built-in `.mov` recording with plug-in audio and a separate source window suitable for Window Capture/source capture.
 - **Independent project.** Own source tree, git history, docs, plug-in codes, and build artifacts.
 - **Mac-first implementation.** AU, VST3, and Standalone from one JUCE 8 CMake project.
 
@@ -29,5 +29,5 @@ The panel should feel like system UI, not a themed hardware panel. The display c
 
 - macOS 11+ universal binary (`arm64;x86_64`).
 - JUCE 8 pinned as a git submodule.
-- Audio thread never records, paints, allocates, locks, or opens UI.
+- Audio thread never encodes, paints, allocates, locks, opens UI, or touches files.
 - Plug-in codes and parameter IDs are immutable after release.

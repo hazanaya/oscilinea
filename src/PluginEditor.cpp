@@ -9,6 +9,7 @@ namespace SoundShape {
 namespace
 {
     constexpr int panelHeight = 172;
+    constexpr int audioDrainChunkSamples = 4096;
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
@@ -47,7 +48,11 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
 PluginEditor::~PluginEditor()
 {
     if (recorder_.isRecording())
+    {
+        processor_.stopAudioCapture();
+        drainCapturedAudio(256, false);
         recorder_.stop();
+    }
 
     sourceWindow_.reset();
     setLookAndFeel(nullptr);
@@ -114,6 +119,8 @@ void PluginEditor::toggleRecording()
     if (recorder_.isRecording())
     {
         const auto completedFile = activeCaptureFile_;
+        processor_.stopAudioCapture();
+        drainCapturedAudio(256);
         const auto result = recorder_.stop();
         controls_.setRecording(false);
         activeCaptureFile_ = juce::File();
@@ -139,15 +146,21 @@ void PluginEditor::beginRecording()
 {
     const auto outputFile = makeCaptureFile();
     const auto snapshot = view_.createSnapshot();
+    const int audioChannels = juce::jlimit(0,
+                                           2,
+                                           processor_.getActiveInputChannelsAtomic()->load(std::memory_order_acquire));
     const auto result = recorder_.start(outputFile,
                                         snapshot.getWidth(),
                                         snapshot.getHeight(),
                                         controls_.getCaptureFps(),
-                                        view_.hasTransparentBackground());
+                                        view_.hasTransparentBackground(),
+                                        processor_.getSampleRate(),
+                                        audioChannels);
     if (result.wasOk())
     {
         const double nowMs = juce::Time::getMillisecondCounterHiRes();
         activeCaptureFile_ = outputFile;
+        processor_.startAudioCapture(audioChannels);
         recorder_.addFrame(snapshot);
         recordStartMs_ = nowMs;
         nextCaptureMs_ = nowMs + 1000.0 / static_cast<double>(controls_.getCaptureFps());
@@ -159,6 +172,29 @@ void PluginEditor::beginRecording()
                                                 "Sound Shape",
                                                 result.getErrorMessage(),
                                                 this);
+}
+
+void PluginEditor::drainCapturedAudio(int maxChunks, bool showWarning)
+{
+    for (int chunk = 0; chunk < maxChunks && recorder_.canAcceptAudio(); ++chunk)
+    {
+        const int samplesRead = processor_.readCapturedAudio(capturedAudioScratch_, audioDrainChunkSamples);
+        if (samplesRead <= 0)
+            return;
+
+        const auto result = recorder_.addAudioSamples(capturedAudioScratch_, samplesRead);
+        if (result.failed())
+        {
+            if (showWarning)
+            {
+                juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                            "Sound Shape",
+                                                            result.getErrorMessage(),
+                                                            this);
+            }
+            return;
+        }
+    }
 }
 
 void PluginEditor::promptToSaveCompletedRecording(const juce::File& captureFile)
@@ -240,7 +276,10 @@ void PluginEditor::onVBlank()
     view_.tick();
 
     if (recorder_.isRecording())
+    {
         controls_.setRecordingElapsedSeconds((nowMs - recordStartMs_) / 1000.0);
+        drainCapturedAudio(8);
+    }
 
     const bool needsSourceFrame = sourceWindow_ != nullptr && sourceWindow_->isVisible();
     const bool needsRecordFrame = recorder_.isRecording()
