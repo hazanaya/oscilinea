@@ -10,6 +10,33 @@ namespace
 {
     constexpr int panelHeight = 172;
     constexpr int audioDrainChunkSamples = 4096;
+    constexpr float panelToggleVisibleWidthRatio = 0.20f;
+    constexpr float panelToggleHitWidthRatio = 0.36f;
+    constexpr int panelToggleHitHeight = 38;
+    constexpr int panelToggleBottomInset = 4;
+}
+
+PanelToggleButton::PanelToggleButton()
+    : juce::Button("Panel controls")
+{
+}
+
+void PanelToggleButton::paintButton(juce::Graphics& g,
+                                    bool shouldDrawButtonAsHighlighted,
+                                    bool shouldDrawButtonAsDown)
+{
+    const auto bounds = getLocalBounds().toFloat();
+    const auto lineWidth = juce::jmax(84.0f, bounds.getWidth() * (panelToggleVisibleWidthRatio / panelToggleHitWidthRatio));
+    const auto lineHeight = shouldDrawButtonAsDown ? 4.0f : 3.0f;
+    const auto lineBounds = juce::Rectangle<float>(lineWidth, lineHeight)
+                                .withCentre(bounds.getCentre().withY(bounds.getBottom() - 12.0f));
+
+    const float alpha = shouldDrawButtonAsDown ? 0.95f
+                      : shouldDrawButtonAsHighlighted ? 0.72f
+                                                       : 0.32f;
+
+    g.setColour(findColour(juce::TextButton::textColourOffId).withAlpha(alpha));
+    g.fillRoundedRectangle(lineBounds, lineHeight * 0.5f);
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
@@ -73,14 +100,14 @@ void PluginEditor::resized()
 
     view_.setBounds(bounds);
 
-    constexpr int toggleW = 24;
-    constexpr int toggleH = 18;
-    constexpr int margin = 10;
-    constexpr int visiblePanelOffset = 12;
+    const int toggleW = juce::jlimit(180,
+                                     520,
+                                     static_cast<int>(static_cast<float>(fullBounds.getWidth()) * panelToggleHitWidthRatio));
+    constexpr int toggleH = panelToggleHitHeight;
     const int toggleY = panelVisible_
-                        ? fullBounds.getBottom() - panelHeight - toggleH - visiblePanelOffset
-                        : fullBounds.getBottom() - toggleH - margin;
-    panelToggleButton_.setBounds(fullBounds.getRight() - toggleW - margin,
+                        ? fullBounds.getBottom() - panelHeight - toggleH + panelToggleBottomInset
+                        : fullBounds.getBottom() - toggleH;
+    panelToggleButton_.setBounds(fullBounds.getCentreX() - toggleW / 2,
                                  toggleY,
                                  toggleW,
                                  toggleH);
@@ -90,17 +117,15 @@ void PluginEditor::setPanelVisible(bool visible)
 {
     panelVisible_ = visible;
     controls_.setVisible(visible);
-    panelToggleButton_.setButtonText(visible ? "v" : "^");
     resized();
 }
 
 void PluginEditor::updatePanelToggleChrome(bool hovered)
 {
-    panelToggleButton_.setAlpha(hovered ? 0.92f : 0.0f);
-    panelToggleButton_.setColour(juce::TextButton::buttonColourId,
-                                 lookAndFeel_.controlFill().withAlpha(0.88f));
+    panelToggleButton_.setAlpha(hovered ? 1.0f : 0.82f);
     panelToggleButton_.setColour(juce::TextButton::textColourOffId,
                                  lookAndFeel_.primaryText());
+    panelToggleButton_.repaint();
 }
 
 juce::File PluginEditor::makeCaptureFile() const

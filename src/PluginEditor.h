@@ -16,21 +16,27 @@
 
 namespace SoundShape {
 
-class PanelToggleButton final : public juce::TextButton
+class PanelToggleButton final : public juce::Button
 {
 public:
+    PanelToggleButton();
+
     std::function<void(bool)> onHoverChanged;
+
+    void paintButton(juce::Graphics& g,
+                     bool shouldDrawButtonAsHighlighted,
+                     bool shouldDrawButtonAsDown) override;
 
     void mouseEnter(const juce::MouseEvent& event) override
     {
-        juce::TextButton::mouseEnter(event);
+        juce::Button::mouseEnter(event);
         if (onHoverChanged)
             onHoverChanged(true);
     }
 
     void mouseExit(const juce::MouseEvent& event) override
     {
-        juce::TextButton::mouseExit(event);
+        juce::Button::mouseExit(event);
         if (onHoverChanged)
             onHoverChanged(false);
     }
