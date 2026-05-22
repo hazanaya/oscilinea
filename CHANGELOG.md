@@ -18,3 +18,4 @@ All notable changes to this project will be documented in this file.
 - Fixed a host crash when starting transparent recordings by using ProRes-safe AVFoundation settings and converting encoder exceptions into normal recording errors.
 - Added AAC audio muxing to `.mov` recordings for the audio passing through the plug-in.
 - Replaced the panel chevron with a centered bottom handle and larger hover target.
+- Added a light-mode trace default so transparent displays stay visible on light system backgrounds.

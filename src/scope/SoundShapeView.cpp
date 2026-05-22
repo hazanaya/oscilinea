@@ -261,12 +261,14 @@ void SoundShapeView::tick()
                                                     : 1.0 / 60.0;
     lastTickMs_ = nowMs;
 
-    renderOptions_.bgBrightness = pBgBrightness_->load(std::memory_order_relaxed);
+    const bool transparent = pTransparentBg_->load(std::memory_order_relaxed) > 0.5f;
+    renderOptions_.bgBrightness = transparent && ! juce::Desktop::getInstance().isDarkModeActive()
+                                  ? 1.0f
+                                  : pBgBrightness_->load(std::memory_order_relaxed);
     renderOptions_.bgHueDeg = pBgHue_->load(std::memory_order_relaxed);
     renderOptions_.bgSaturation = pBgSaturation_->load(std::memory_order_relaxed);
-    renderOptions_.bgAlpha = pTransparentBg_->load(std::memory_order_relaxed) > 0.5f
-                             ? 0.0f
-                             : pBgAlpha_->load(std::memory_order_relaxed);
+    renderOptions_.bgAlpha = transparent ? 0.0f
+                                         : pBgAlpha_->load(std::memory_order_relaxed);
     renderOptions_.traceHueDeg = pTraceHue_->load(std::memory_order_relaxed);
     renderOptions_.traceSaturation = pTraceSaturation_->load(std::memory_order_relaxed);
     renderOptions_.traceBrightness = pTraceBrightness_->load(std::memory_order_relaxed);

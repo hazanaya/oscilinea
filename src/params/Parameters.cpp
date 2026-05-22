@@ -2,6 +2,14 @@
 
 namespace SoundShape {
 
+namespace
+{
+    float defaultTraceBrightness() noexcept
+    {
+        return juce::Desktop::getInstance().isDarkModeActive() ? 1.0f : 0.16f;
+    }
+}
+
 Parameters::Parameters(juce::AudioProcessor& processor)
     : state_(processor, nullptr, "PARAMETERS", makeLayout())
 {
@@ -85,7 +93,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::ParameterID { ParamID::traceBrightness, 1 },
         "Brightness",
         Range { 0.0f, 1.0f, 0.01f },
-        1.0f,
+        defaultTraceBrightness(),
         juce::String {}));
 
     layout.add(std::make_unique<Float>(

@@ -12,7 +12,7 @@ Current scaffold includes:
 - Pass-through `PluginProcessor` with `ScopeFeed` audio-to-UI handoff and a recording-only audio FIFO.
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
 - Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, line styling, cycle-span glide control, recording, and a generic source window. The panel can be hidden or revealed with a centered bottom handle and generous hover target.
-- Default appearance is white clean trace, transparent background, no trail.
+- Default appearance is a clean trace over a transparent background with no trail. Dark mode defaults to a white trace; light mode defaults to a dark neutral trace for contrast.
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha. Recordings mux AAC audio for the signal passing through the plug-in.
 - Docs, git metadata, license, and project handoff files.
 

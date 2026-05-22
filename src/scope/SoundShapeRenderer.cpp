@@ -56,7 +56,7 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
     const float halfH = area.getHeight() * 0.48f;
     const float x0 = area.getX();
     const float xSpan = area.getWidth();
-    const bool darkBg = options.bgBrightness < 0.5f || options.bgAlpha < 0.5f;
+    const bool darkBg = options.bgBrightness < 0.5f;
     const auto colour = traceColour(options, darkBg);
 
     const int maxPoints = juce::jmax(2, static_cast<int>(xSpan * 4.0f));
