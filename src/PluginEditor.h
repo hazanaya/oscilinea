@@ -23,7 +23,6 @@ public:
     PanelToggleButton();
 
     std::function<void(bool)> onHoverChanged;
-    std::function<void()> onHoverExpired;
 
     void paintButton(juce::Graphics& g,
                      bool shouldDrawButtonAsHighlighted,
@@ -56,14 +55,11 @@ public:
     ~PluginEditor() override;
 
     void paint(juce::Graphics& g) override;
-    void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
 
 private:
     void setPanelVisible(bool visible);
     void updatePanelToggleChrome(bool hovered);
-    void hidePanelToggleLine();
-    void repaintPanelToggleBounds();
     void onVBlank();
     void toggleRecording();
     void beginRecording();
@@ -89,8 +85,6 @@ private:
     double nextCaptureMs_ = 0.0;
     double recordStartMs_ = 0.0;
     int lastSourceAspect_ = -1;
-    bool panelToggleHovered_ = false;
-    bool panelToggleLineVisible_ = true;
     bool panelVisible_ = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
