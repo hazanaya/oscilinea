@@ -35,4 +35,5 @@ Verification:
 - Do not change `PLUGIN_CODE=Sshp`, `PLUGIN_MANUFACTURER_CODE=Hzny`, or `BUNDLE_ID=com.hazaelanaya.soundshape` after release.
 - Do not rename parameter IDs once sessions may exist in user hosts.
 - Recording runs on the UI thread. Keep it out of `processBlock`.
+- Transparent recording uses ProRes 4444. Do not attach H.264-only compression properties, such as average bitrate, to the ProRes writer input; AVFoundation throws an Objective-C exception for that.
 - The source window is a practical capture surface, not a true system video device.

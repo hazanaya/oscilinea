@@ -15,3 +15,4 @@ All notable changes to this project will be documented in this file.
 - Added section dividers, aligned the Record row control height with the rest of the panel, and moved the hover-only panel chevron farther from the panel edge.
 - Smoothed large period changes so the Sound Shape view glides between cycle spans instead of snapping between zoom levels.
 - Added a Cycle Glide parameter and Signal-row Glide control, ranging from instant cycle-span changes to 4-second transitions.
+- Fixed a host crash when starting transparent recordings by using ProRes-safe AVFoundation settings and converting encoder exceptions into normal recording errors.

@@ -12,6 +12,25 @@ namespace
         return [NSString stringWithUTF8String:s.toRawUTF8()];
     }
 
+    juce::String juceString(NSString* s)
+    {
+        return s != nil ? juce::String([s UTF8String]) : juce::String();
+    }
+
+    juce::String exceptionMessage(NSException* exception)
+    {
+        if (exception == nil)
+            return "Video recording failed while preparing the encoder.";
+
+        auto message = juceString(exception.name);
+        const auto reason = juceString(exception.reason);
+        if (reason.isNotEmpty())
+            message << ": " << reason;
+
+        return message.isNotEmpty() ? message
+                                    : "Video recording failed while preparing the encoder.";
+    }
+
     juce::Image fittedARGB(const juce::Image& source, int width, int height)
     {
         if (source.isValid()
@@ -79,53 +98,90 @@ juce::Result VideoRecorder::start(const juce::File& outputFile, int width, int h
     if (outputFile.existsAsFile())
         outputFile.deleteFile();
 
-    @autoreleasepool
+    auto failStart = [&](const juce::String& message) -> juce::Result
     {
-        NSURL* url = [NSURL fileURLWithPath:nsString(outputFile.getFullPathName())];
-        NSError* error = nil;
+        impl_->writer = nil;
+        impl_->input = nil;
+        impl_->adaptor = nil;
+        outputFile.deleteFile();
+        return juce::Result::fail(message);
+    };
 
-        impl_->writer = [[AVAssetWriter alloc] initWithURL:url
-                                                   fileType:AVFileTypeQuickTimeMovie
-                                                      error:&error];
-        if (impl_->writer == nil)
-            return juce::Result::fail(error != nil ? juce::String([error.localizedDescription UTF8String])
-                                                   : "Could not create AVAssetWriter.");
+    @try
+    {
+        @autoreleasepool
+        {
+            NSURL* url = [NSURL fileURLWithPath:nsString(outputFile.getFullPathName())];
+            NSError* error = nil;
 
-        NSDictionary* compression = @{
-            AVVideoAverageBitRateKey: @(juce::jmax(2000000, width * height * 6))
-        };
+            impl_->writer = [[AVAssetWriter alloc] initWithURL:url
+                                                       fileType:AVFileTypeQuickTimeMovie
+                                                          error:&error];
+            if (impl_->writer == nil)
+                return failStart(error != nil ? juceString(error.localizedDescription)
+                                              : "Could not create AVAssetWriter.");
 
-        NSString* codec = preserveAlpha ? AVVideoCodecTypeAppleProRes4444 : AVVideoCodecTypeH264;
-        NSDictionary* settings = @{
-            AVVideoCodecKey: codec,
-            AVVideoWidthKey: @(width),
-            AVVideoHeightKey: @(height),
-            AVVideoCompressionPropertiesKey: compression
-        };
+            NSDictionary* settings = nil;
+            if (preserveAlpha)
+            {
+                settings = @{
+                    AVVideoCodecKey: AVVideoCodecTypeAppleProRes4444,
+                    AVVideoWidthKey: @(width),
+                    AVVideoHeightKey: @(height)
+                };
+            }
+            else
+            {
+                NSDictionary* compression = @{
+                    AVVideoAverageBitRateKey: @(juce::jmax(2000000, width * height * 6))
+                };
 
-        impl_->input = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo
-                                                           outputSettings:settings];
-        impl_->input.expectsMediaDataInRealTime = YES;
+                settings = @{
+                    AVVideoCodecKey: AVVideoCodecTypeH264,
+                    AVVideoWidthKey: @(width),
+                    AVVideoHeightKey: @(height),
+                    AVVideoCompressionPropertiesKey: compression
+                };
+            }
 
-        NSDictionary* attributes = @{
-            (NSString*) kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
-            (NSString*) kCVPixelBufferWidthKey: @(width),
-            (NSString*) kCVPixelBufferHeightKey: @(height)
-        };
+            impl_->input = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo
+                                                               outputSettings:settings];
+            if (impl_->input == nil)
+                return failStart("Could not create the video input.");
 
-        impl_->adaptor =
-            [AVAssetWriterInputPixelBufferAdaptor assetWriterInputPixelBufferAdaptorWithAssetWriterInput:impl_->input
-                                                                             sourcePixelBufferAttributes:attributes];
+            impl_->input.expectsMediaDataInRealTime = YES;
 
-        if (! [impl_->writer canAddInput:impl_->input])
-            return juce::Result::fail("AVAssetWriter cannot add the video input.");
+            NSDictionary* attributes = @{
+                (NSString*) kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
+                (NSString*) kCVPixelBufferWidthKey: @(width),
+                (NSString*) kCVPixelBufferHeightKey: @(height)
+            };
 
-        [impl_->writer addInput:impl_->input];
+            impl_->adaptor =
+                [AVAssetWriterInputPixelBufferAdaptor assetWriterInputPixelBufferAdaptorWithAssetWriterInput:impl_->input
+                                                                                 sourcePixelBufferAttributes:attributes];
+            if (impl_->adaptor == nil)
+                return failStart("Could not create the video frame adaptor.");
 
-        if (! [impl_->writer startWriting])
-            return juce::Result::fail("AVAssetWriter could not start writing.");
+            if (! [impl_->writer canAddInput:impl_->input])
+                return failStart("AVAssetWriter cannot add the video input.");
 
-        [impl_->writer startSessionAtSourceTime:kCMTimeZero];
+            [impl_->writer addInput:impl_->input];
+
+            if (! [impl_->writer startWriting])
+            {
+                const auto message = impl_->writer.error != nil
+                                         ? juceString(impl_->writer.error.localizedDescription)
+                                         : juce::String("AVAssetWriter could not start writing.");
+                return failStart(message);
+            }
+
+            [impl_->writer startSessionAtSourceTime:kCMTimeZero];
+        }
+    }
+    @catch (NSException* exception)
+    {
+        return failStart(exceptionMessage(exception));
     }
 
     impl_->width = width;
