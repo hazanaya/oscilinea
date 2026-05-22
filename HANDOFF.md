@@ -13,6 +13,7 @@ Current scaffold includes:
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
 - Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, line styling, cycle-span glide control, recording, and a generic source window. The panel can be hidden or revealed with a centered bottom handle and generous hover target.
 - Default appearance is a clean trace over a transparent background with no trail. Dark mode defaults to a white trace; light mode defaults to a dark neutral trace for contrast.
+- The Look row has a compact defaults menu. It can save the current appearance as the default for future new plug-in instances or reset back to built-in appearance defaults. Saved host sessions still reopen from their saved state.
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha. Recordings mux AAC audio for the signal passing through the plug-in.
 - Docs, git metadata, license, and project handoff files.
 
@@ -34,6 +35,7 @@ Verification:
 
 - Do not change `PLUGIN_CODE=Sshp`, `PLUGIN_MANUFACTURER_CODE=Hzny`, or `BUNDLE_ID=com.hazaelanaya.soundshape` after release.
 - Do not rename parameter IDs once sessions may exist in user hosts.
+- New-instance appearance defaults are external preference data, not plug-in parameters. They are applied at construction and then host-saved state can override them.
 - Recording runs on the UI thread. Keep it out of `processBlock`.
 - The audio thread only copies into `AudioCaptureBuffer` while recording; keep AVFoundation and file work on the message thread.
 - Transparent recording uses ProRes 4444. Do not attach H.264-only compression properties, such as average bitrate, to the ProRes writer input; AVFoundation throws an Objective-C exception for that.

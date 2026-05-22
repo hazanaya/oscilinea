@@ -1,6 +1,7 @@
 #include "Controls.h"
 
 #include "../params/Parameters.h"
+#include "../params/AppearanceDefaults.h"
 #include "SystemLookAndFeel.h"
 
 #include <cmath>
@@ -91,6 +92,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     addAndMakeVisible(transparentButton_);
     addAndMakeVisible(recordButton_);
     addAndMakeVisible(sourceWindowButton_);
+    addAndMakeVisible(defaultsMenuButton_);
 
     configureSectionLabel(signalSectionLabel_, "Signal");
     configureSectionLabel(lookSectionLabel_, "Look");
@@ -134,10 +136,13 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     sourceWindowButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     traceColourButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     backgroundColourButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+    defaultsMenuButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+    defaultsMenuButton_.setTooltip("Look defaults");
     recordButton_.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
 
     traceColourButton_.onClick = [this]() { showColourPicker(ColourTarget::Trace); };
     backgroundColourButton_.onClick = [this]() { showColourPicker(ColourTarget::Background); };
+    defaultsMenuButton_.onClick = [this]() { showDefaultsMenu(); };
 
     autoGainAtt_ = std::make_unique<ButtonAttachment>(apvts_, ParamID::autoGain, autoGainButton_);
     freezeAtt_ = std::make_unique<ButtonAttachment>(apvts_, ParamID::freeze, freezeButton_);
@@ -351,6 +356,41 @@ void ControlPanel::setSourceWindowCallback(std::function<void()> callback)
     sourceWindowButton_.onClick = std::move(callback);
 }
 
+void ControlPanel::showDefaultsMenu()
+{
+    juce::PopupMenu menu;
+    menu.addItem(1, "Save Current Look as New Instance Default");
+    menu.addItem(2, "Reset New Instance Defaults", AppearanceDefaults::hasSavedDefaults());
+
+    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&defaultsMenuButton_),
+        [safeThis = juce::Component::SafePointer<ControlPanel>(this)](int result)
+        {
+            if (safeThis == nullptr || result == 0)
+                return;
+
+            juce::Result actionResult = juce::Result::ok();
+            juce::String successMessage;
+
+            if (result == 1)
+            {
+                actionResult = AppearanceDefaults::saveFrom(safeThis->apvts_);
+                successMessage = "New plug-in instances will start with this look.";
+            }
+            else if (result == 2)
+            {
+                actionResult = AppearanceDefaults::reset();
+                successMessage = "New plug-in instances will use the built-in appearance defaults.";
+            }
+
+            juce::NativeMessageBox::showMessageBoxAsync(
+                actionResult.wasOk() ? juce::MessageBoxIconType::InfoIcon
+                                     : juce::MessageBoxIconType::WarningIcon,
+                "Sound Shape",
+                actionResult.wasOk() ? successMessage : actionResult.getErrorMessage(),
+                safeThis.getComponent());
+        });
+}
+
 void ControlPanel::setRecording(bool recording)
 {
     recording_ = recording;
@@ -531,6 +571,14 @@ void ControlPanel::resized()
         row.removeFromLeft(juce::jmin(contentGap, row.getWidth()));
     };
 
+    auto takeLookSection = [this](juce::Rectangle<int>& row)
+    {
+        auto section = row.removeFromLeft(juce::jmin(sectionW, row.getWidth()));
+        defaultsMenuButton_.setBounds(section.removeFromRight(24).withSizeKeepingCentre(24, 22));
+        lookSectionLabel_.setBounds(section);
+        row.removeFromLeft(juce::jmin(contentGap, row.getWidth()));
+    };
+
     auto layoutLabeled = [](juce::Rectangle<int> area,
                             juce::Label& label,
                             juce::Component& control)
@@ -569,7 +617,7 @@ void ControlPanel::resized()
     layoutLabeled(signalRow.removeFromLeft(signalSliderW).reduced(2, 0), cycleGlideLabel_, cycleGlideSlider_);
     layoutLabeled(signalRow.reduced(2, 0), persistenceLabel_, persistenceSlider_);
 
-    takeSection(lookRow, lookSectionLabel_);
+    takeLookSection(lookRow);
     auto swatches = take(lookRow, 116);
     layoutColour(swatches.removeFromLeft(58), traceColourButton_, traceColourLabel_);
     layoutColour(swatches, backgroundColourButton_, backgroundColourLabel_);

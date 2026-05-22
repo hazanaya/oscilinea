@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 
 #include "PluginEditor.h"
+#include "params/AppearanceDefaults.h"
 
 namespace SoundShape {
 
@@ -16,6 +17,7 @@ PluginProcessor::PluginProcessor()
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
       parameters_(*this)
 {
+    AppearanceDefaults::applyTo(parameters_.getState());
 }
 
 PluginProcessor::~PluginProcessor() = default;

@@ -43,6 +43,8 @@ target_sources(SoundShape PRIVATE
     src/PluginProcessor.h
     src/PluginEditor.cpp
     src/PluginEditor.h
+    src/params/AppearanceDefaults.cpp
+    src/params/AppearanceDefaults.h
     src/dsp/AudioCaptureBuffer.h
     src/dsp/ScopeFeed.h
     src/params/Parameters.cpp

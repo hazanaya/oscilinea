@@ -17,6 +17,7 @@ src/
 ├── PluginEditor.{h,cpp}      - editor, vblank tick, recording/source-window orchestration
 ├── dsp/AudioCaptureBuffer.h  - recording-only audio FIFO drained by the editor
 ├── dsp/ScopeFeed.h           - lock-free latest-sample ring buffer
+├── params/AppearanceDefaults.* - external new-instance appearance preferences
 ├── params/Parameters.{h,cpp} - AudioProcessorValueTreeState layout and serialization
 ├── scope/
 │   ├── SoundShapeView.*      - period detection, cycle integration, phosphor image
@@ -61,6 +62,10 @@ The v0.1 capture strategy has two layers:
 - **External capture use:** the source window mirrors the display in a normal native window. Streaming and video tools can capture it via Window Capture/source capture.
 
 A true video-device source is deferred because it requires a macOS virtual camera, Syphon, NDI, or similar IPC layer outside ordinary AU/VST plug-in behavior.
+
+## Appearance Defaults
+
+The Look row can save current appearance values as defaults for future new plug-in instances. These defaults are external preference data in the user application support folder, not automatable plug-in parameters and not part of host project state. They are applied when a processor is constructed; if a host later restores a saved session state, that saved state replaces them.
 
 ## External Dependencies
 

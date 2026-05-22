@@ -43,6 +43,7 @@ public:
     void setRecordingElapsedSeconds(double elapsedSeconds);
     void setSourceWindowOpen(bool open);
     void refreshFromParameters();
+    void showDefaultsMenu();
 
     int getCaptureFps() const;
     int getSourceAspectIndex() const;
@@ -81,6 +82,7 @@ private:
     juce::ToggleButton transparentButton_ { "Transparent" };
     juce::TextButton recordButton_ { "Record" };
     juce::TextButton sourceWindowButton_ { "Open" };
+    juce::TextButton defaultsMenuButton_ { "..." };
 
     juce::Label signalSectionLabel_;
     juce::Label lookSectionLabel_;
