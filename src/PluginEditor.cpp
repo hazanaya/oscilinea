@@ -47,7 +47,15 @@ void PanelToggleButton::timerCallback()
 {
     hoverRevealActive_ = false;
     stopTimer();
+    setAlpha(0.0f);
+    repaintParentArea();
     repaint();
+}
+
+void PanelToggleButton::repaintParentArea()
+{
+    if (auto* parent = getParentComponent())
+        parent->repaint(getBounds());
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)

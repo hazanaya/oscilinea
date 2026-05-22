@@ -33,6 +33,8 @@ public:
         juce::Button::mouseEnter(event);
         hovering_ = true;
         hoverRevealActive_ = true;
+        setAlpha(1.0f);
+        repaintParentArea();
         startTimer(1800);
         repaint();
         if (onHoverChanged)
@@ -45,6 +47,8 @@ public:
         stopTimer();
         hovering_ = false;
         hoverRevealActive_ = true;
+        setAlpha(0.82f);
+        repaintParentArea();
         repaint();
         if (onHoverChanged)
             onHoverChanged(false);
@@ -52,6 +56,7 @@ public:
 
 private:
     void timerCallback() override;
+    void repaintParentArea();
 
     bool hoverRevealActive_ = true;
     bool hovering_ = false;

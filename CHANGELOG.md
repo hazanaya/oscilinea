@@ -22,3 +22,4 @@ All notable changes to this project will be documented in this file.
 - Added Look-row actions to save or reset new-instance appearance defaults across plug-in instances.
 - Made the panel handle hide after a short sustained hover.
 - Fixed the panel handle hover timeout so the line fully disappears and the hover area tracks the line position.
+- Forced the panel handle timeout to clear stale pixels by hiding the whole handle component and repainting its parent area.
