@@ -16,7 +16,8 @@
 
 namespace SoundShape {
 
-class PanelToggleButton final : public juce::Button
+class PanelToggleButton final : public juce::Button,
+                                private juce::Timer
 {
 public:
     PanelToggleButton();
@@ -30,6 +31,9 @@ public:
     void mouseEnter(const juce::MouseEvent& event) override
     {
         juce::Button::mouseEnter(event);
+        hoverRevealActive_ = true;
+        startTimer(1800);
+        repaint();
         if (onHoverChanged)
             onHoverChanged(true);
     }
@@ -37,9 +41,17 @@ public:
     void mouseExit(const juce::MouseEvent& event) override
     {
         juce::Button::mouseExit(event);
+        stopTimer();
+        hoverRevealActive_ = true;
+        repaint();
         if (onHoverChanged)
             onHoverChanged(false);
     }
+
+private:
+    void timerCallback() override;
+
+    bool hoverRevealActive_ = true;
 };
 
 class PluginEditor final : public juce::AudioProcessorEditor

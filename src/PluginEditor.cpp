@@ -32,11 +32,18 @@ void PanelToggleButton::paintButton(juce::Graphics& g,
                                 .withCentre(bounds.getCentre().withY(bounds.getBottom() - 12.0f));
 
     const float alpha = shouldDrawButtonAsDown ? 0.95f
-                      : shouldDrawButtonAsHighlighted ? 0.72f
+                      : shouldDrawButtonAsHighlighted ? (hoverRevealActive_ ? 0.72f : 0.0f)
                                                        : 0.32f;
 
     g.setColour(findColour(juce::TextButton::textColourOffId).withAlpha(alpha));
     g.fillRoundedRectangle(lineBounds, lineHeight * 0.5f);
+}
+
+void PanelToggleButton::timerCallback()
+{
+    hoverRevealActive_ = false;
+    stopTimer();
+    repaint();
 }
 
 PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)

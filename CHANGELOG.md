@@ -20,3 +20,4 @@ All notable changes to this project will be documented in this file.
 - Replaced the panel chevron with a centered bottom handle and larger hover target.
 - Added a light-mode trace default so transparent displays stay visible on light system backgrounds.
 - Added Look-row actions to save or reset new-instance appearance defaults across plug-in instances.
+- Made the panel handle hide after a short sustained hover.
