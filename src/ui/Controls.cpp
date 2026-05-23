@@ -47,6 +47,13 @@ namespace
         component.setAlpha(enabled ? 1.0f : 0.4f);
     }
 
+    juce::Colour primaryTextColour()
+    {
+        return juce::Desktop::getInstance().isDarkModeActive()
+                   ? juce::Colour(0xffeeeeee)
+                   : juce::Colour(0xff1d1d1f);
+    }
+
     constexpr juce::uint32 captionColour = 0xff8e8e93;
 }
 
@@ -423,6 +430,10 @@ void ControlPanel::setSourceWindowOpen(bool open)
     sourceWindowButton_.setButtonText(open ? "Hide" : "Open");
     sourceWindowButton_.setColour(juce::TextButton::buttonColourId,
                                   open ? juce::Colour(0xff6e6e73) : juce::Colours::transparentBlack);
+    sourceWindowButton_.setColour(juce::TextButton::textColourOffId,
+                                  open ? juce::Colours::white : primaryTextColour());
+    sourceWindowButton_.setColour(juce::TextButton::textColourOnId,
+                                  open ? juce::Colours::white : primaryTextColour());
 }
 
 void ControlPanel::updateRecordButtonText()

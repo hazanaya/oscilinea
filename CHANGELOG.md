@@ -27,3 +27,4 @@ All notable changes to this project will be documented in this file.
 - Restored the panel handle to the chevron-era alpha visibility model with a centered line inside the wider hit target.
 - Made recording temp files UUID-backed and prevented recorder start-up from deleting pre-existing destinations, so multiple instances can record concurrently without filename collisions.
 - Matched control captions and slider value text to the section labels so they remain readable in light mode.
+- Fixed the source window button text color so it remains readable in light mode.
