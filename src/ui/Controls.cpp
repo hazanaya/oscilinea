@@ -46,6 +46,8 @@ namespace
         component.setEnabled(enabled);
         component.setAlpha(enabled ? 1.0f : 0.4f);
     }
+
+    constexpr juce::uint32 captionColour = 0xff8e8e93;
 }
 
 ColourDotButton::ColourDotButton()
@@ -194,6 +196,7 @@ void ControlPanel::configureLabel(juce::Label& label, const juce::String& text)
 {
     label.setText(text, juce::dontSendNotification);
     label.setJustificationType(juce::Justification::centredLeft);
+    label.setColour(juce::Label::textColourId, juce::Colour(captionColour));
     addAndMakeVisible(label);
 }
 
@@ -201,7 +204,7 @@ void ControlPanel::configureSectionLabel(juce::Label& label, const juce::String&
 {
     label.setText(text, juce::dontSendNotification);
     label.setJustificationType(juce::Justification::centredLeft);
-    label.setColour(juce::Label::textColourId, juce::Colour(0xff8e8e93));
+    label.setColour(juce::Label::textColourId, juce::Colour(captionColour));
     addAndMakeVisible(label);
 }
 

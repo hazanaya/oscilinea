@@ -26,3 +26,4 @@ All notable changes to this project will be documented in this file.
 - Moved the panel handle line into the editor overlay so the invisible hit target never leaves a stale line behind.
 - Restored the panel handle to the chevron-era alpha visibility model with a centered line inside the wider hit target.
 - Made recording temp files UUID-backed and prevented recorder start-up from deleting pre-existing destinations, so multiple instances can record concurrently without filename collisions.
+- Matched all control caption colors to the section labels so they remain readable in light mode.
