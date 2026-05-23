@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted; Syphon portion superseded by [0004](0004-syphon-external-source.md)
 
 ## Context
 

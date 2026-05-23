@@ -2,6 +2,7 @@
 
 #include "params/Parameters.h"
 
+#include <atomic>
 #include <cmath>
 
 namespace SoundShape {
@@ -15,6 +16,13 @@ namespace
     constexpr int panelToggleHitHeight = 38;
     constexpr int panelToggleInsetFromPanel = 8;
     constexpr int panelToggleInsetFromBottom = 19;
+
+    std::atomic<int> nextExternalSourceIndex { 1 };
+
+    juce::String makeExternalSourceName()
+    {
+        return "Sound Shape " + juce::String(nextExternalSourceIndex.fetch_add(1));
+    }
 }
 
 PanelToggleButton::PanelToggleButton()
@@ -64,6 +72,7 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
 
     controls_.setRecordCallback([this]() { toggleRecording(); });
     controls_.setSourceWindowCallback([this]() { toggleSourceWindow(); });
+    controls_.setExternalSourceCallback([this]() { toggleExternalSource(); });
 
     addAndMakeVisible(view_);
     addAndMakeVisible(controls_);
@@ -89,6 +98,7 @@ PluginEditor::~PluginEditor()
     }
 
     sourceWindow_.reset();
+    syphonPublisher_.stop();
     setLookAndFeel(nullptr);
 }
 
@@ -291,9 +301,43 @@ void PluginEditor::toggleSourceWindow()
     controls_.setSourceWindowOpen(shouldShow);
 }
 
+void PluginEditor::toggleExternalSource()
+{
+    if (syphonPublisher_.isPublishing())
+    {
+        syphonPublisher_.stop();
+        nextExternalSourceMs_ = 0.0;
+        controls_.setExternalSourceOpen(false);
+        return;
+    }
+
+    if (externalSourceName_.isEmpty())
+        externalSourceName_ = makeExternalSourceName();
+
+    auto result = syphonPublisher_.start(externalSourceName_);
+    if (result.wasOk())
+        result = syphonPublisher_.publishFrame(view_.createSnapshot());
+
+    if (result.failed())
+    {
+        syphonPublisher_.stop();
+        controls_.setExternalSourceOpen(false);
+        juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                    "Sound Shape",
+                                                    result.getErrorMessage(),
+                                                    this);
+        return;
+    }
+
+    const double nowMs = juce::Time::getMillisecondCounterHiRes();
+    nextExternalSourceMs_ = nowMs + 1000.0 / static_cast<double>(controls_.getCaptureFps());
+    controls_.setExternalSourceOpen(true);
+}
+
 void PluginEditor::onVBlank()
 {
     controls_.refreshFromParameters();
+    controls_.setExternalSourceOpen(syphonPublisher_.isPublishing());
     const double nowMs = juce::Time::getMillisecondCounterHiRes();
 
     if (huePtr_ != nullptr)
@@ -318,8 +362,10 @@ void PluginEditor::onVBlank()
     const bool needsSourceFrame = sourceWindow_ != nullptr && sourceWindow_->isVisible();
     const bool needsRecordFrame = recorder_.isRecording()
                                   && nowMs >= nextCaptureMs_;
+    const bool needsExternalSourceFrame = syphonPublisher_.isPublishing()
+                                          && nowMs >= nextExternalSourceMs_;
 
-    if (needsSourceFrame || needsRecordFrame)
+    if (needsSourceFrame || needsRecordFrame || needsExternalSourceFrame)
     {
         const auto snapshot = view_.createSnapshot();
 
@@ -340,6 +386,27 @@ void PluginEditor::onVBlank()
         {
             recorder_.addFrame(snapshot);
             nextCaptureMs_ += 1000.0 / static_cast<double>(controls_.getCaptureFps());
+        }
+
+        if (needsExternalSourceFrame)
+        {
+            const auto result = syphonPublisher_.publishFrame(snapshot);
+            if (result.failed())
+            {
+                syphonPublisher_.stop();
+                controls_.setExternalSourceOpen(false);
+                juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                            "Sound Shape",
+                                                            result.getErrorMessage(),
+                                                            this);
+            }
+            else
+            {
+                const double intervalMs = 1000.0 / static_cast<double>(controls_.getCaptureFps());
+                nextExternalSourceMs_ += intervalMs;
+                if (nextExternalSourceMs_ < nowMs - intervalMs)
+                    nextExternalSourceMs_ = nowMs + intervalMs;
+            }
         }
     }
     else if (sourceWindow_ != nullptr)

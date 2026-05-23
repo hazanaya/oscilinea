@@ -39,9 +39,11 @@ public:
 
     void setRecordCallback(std::function<void()> callback);
     void setSourceWindowCallback(std::function<void()> callback);
+    void setExternalSourceCallback(std::function<void()> callback);
     void setRecording(bool recording);
     void setRecordingElapsedSeconds(double elapsedSeconds);
     void setSourceWindowOpen(bool open);
+    void setExternalSourceOpen(bool open);
     void refreshFromParameters();
     void showDefaultsMenu();
 
@@ -82,6 +84,7 @@ private:
     juce::ToggleButton transparentButton_ { "Transparent" };
     juce::TextButton recordButton_ { "Record" };
     juce::TextButton sourceWindowButton_ { "Open" };
+    juce::TextButton externalSourceButton_ { "Start" };
     juce::TextButton defaultsMenuButton_ { "..." };
 
     juce::Label signalSectionLabel_;
@@ -100,6 +103,7 @@ private:
     ColourDotButton backgroundColourButton_;
     juce::Label backgroundColourLabel_;
     juce::Label sourceWindowLabel_;
+    juce::Label externalSourceLabel_;
 
     juce::Slider levelSlider_;
     juce::Label levelLabel_;

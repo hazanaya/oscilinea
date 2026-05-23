@@ -8,6 +8,7 @@
 - **Formats:** AU, VST3, Standalone.
 - **Platform:** macOS 11+ universal binary.
 - **Capture:** AVFoundation `.mov` writer on macOS, with AAC audio for the plug-in input.
+- **Live output:** Syphon server-side source, pinned as `extern/Syphon-Framework` and compiled into the plug-in on macOS.
 
 ## Modules
 
@@ -27,6 +28,7 @@ src/
 │   └── SystemLookAndFeel.*   - quiet macOS-like control drawing
 └── video/
     ├── SourceWindow.*        - separate source-capture surface
+    ├── SyphonPublisher.*     - per-editor Syphon external source publisher
     ├── VideoRecorder.h       - C++ recorder facade
     └── VideoRecorder_mac.mm  - AVFoundation writer
 ```
@@ -43,6 +45,7 @@ host audio buffer
       -> SoundShapeView::tick
       -> repaint editor
       -> optional SourceWindow frame
+      -> optional Syphon frame
       -> optional AVFoundation video frame + audio samples
 ```
 
@@ -51,7 +54,7 @@ host audio buffer
 - `processBlock` is wait-free and allocation-free after `prepareToPlay`.
 - `ScopeFeed` writes on the audio thread and reads on the message thread.
 - `AudioCaptureBuffer` writes bounded audio copies on the audio thread and is drained on the message thread while recording.
-- Pitch detection, smoothing, rendering, recording, and source-window updates run on the message thread.
+- Pitch detection, smoothing, rendering, source-window updates, Syphon publishing, and recording run on the message thread.
 - AVFoundation encoding and file I/O are intentionally not real-time audio responsibilities.
 
 ## Capture Model
@@ -60,8 +63,9 @@ The v0.1 capture strategy has two layers:
 
 - **Recording:** the editor snapshots the rendered display at the selected frame rate and writes `.mov` through AVFoundation. Opaque captures use H.264; transparent-background captures use ProRes 4444 so alpha can be preserved. Audio passing through the plug-in is muxed as AAC.
 - **External capture use:** the source window mirrors the display in a normal native window. Streaming and video tools can capture it via Window Capture/source capture.
+- **Direct live source:** each open editor can start its own Syphon output from the Record row's External Source control. The source uses the current capture FPS and mirrors the rendered display, including transparent-background alpha. Syphon publishing is editor-driven; closing the plug-in editor stops that editor's source.
 
-A true video-device source is deferred because it requires a macOS virtual camera, Syphon, NDI, or similar IPC layer outside ordinary AU/VST plug-in behavior.
+A true video-device source is still deferred because it requires a macOS virtual camera or NDI-style system integration outside ordinary AU/VST plug-in behavior.
 
 ## Appearance Defaults
 
@@ -69,10 +73,10 @@ The Look row can save current appearance values as defaults for future new plug-
 
 ## External Dependencies
 
-JUCE is the only source dependency:
+JUCE and Syphon are source dependencies:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-The macOS SDK supplies AVFoundation, AudioToolbox, CoreMedia, and CoreVideo.
+The macOS SDK supplies AVFoundation, AudioToolbox, Cocoa, CoreMedia, CoreVideo, IOSurface, and OpenGL.

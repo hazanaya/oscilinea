@@ -101,6 +101,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     addAndMakeVisible(transparentButton_);
     addAndMakeVisible(recordButton_);
     addAndMakeVisible(sourceWindowButton_);
+    addAndMakeVisible(externalSourceButton_);
     addAndMakeVisible(defaultsMenuButton_);
 
     configureSectionLabel(signalSectionLabel_, "Signal");
@@ -121,6 +122,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     configureLabel(traceColourLabel_, "Trace");
     configureLabel(backgroundColourLabel_, "Bg");
     configureLabel(sourceWindowLabel_, "Source Window");
+    configureLabel(externalSourceLabel_, "External Source");
 
     addAndMakeVisible(fpsCombo_);
     addAndMakeVisible(sourceAspectCombo_);
@@ -143,6 +145,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
 
     recordButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     sourceWindowButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+    externalSourceButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     traceColourButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     backgroundColourButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     defaultsMenuButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
@@ -182,6 +185,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
 
     setRecording(false);
     setSourceWindowOpen(false);
+    setExternalSourceOpen(false);
     updateColourButtons();
     updateAdvancedVisibility();
 }
@@ -367,6 +371,11 @@ void ControlPanel::setSourceWindowCallback(std::function<void()> callback)
     sourceWindowButton_.onClick = std::move(callback);
 }
 
+void ControlPanel::setExternalSourceCallback(std::function<void()> callback)
+{
+    externalSourceButton_.onClick = std::move(callback);
+}
+
 void ControlPanel::showDefaultsMenu()
 {
     juce::PopupMenu menu;
@@ -434,6 +443,17 @@ void ControlPanel::setSourceWindowOpen(bool open)
                                   open ? juce::Colours::white : primaryTextColour());
     sourceWindowButton_.setColour(juce::TextButton::textColourOnId,
                                   open ? juce::Colours::white : primaryTextColour());
+}
+
+void ControlPanel::setExternalSourceOpen(bool open)
+{
+    externalSourceButton_.setButtonText(open ? "Stop" : "Start");
+    externalSourceButton_.setColour(juce::TextButton::buttonColourId,
+                                    open ? juce::Colour(0xff6e6e73) : juce::Colours::transparentBlack);
+    externalSourceButton_.setColour(juce::TextButton::textColourOffId,
+                                    open ? juce::Colours::white : primaryTextColour());
+    externalSourceButton_.setColour(juce::TextButton::textColourOnId,
+                                    open ? juce::Colours::white : primaryTextColour());
 }
 
 void ControlPanel::updateRecordButtonText()
@@ -650,6 +670,7 @@ void ControlPanel::resized()
     layoutLabeled(take(recordRow, 78), fpsLabel_, fpsCombo_);
     layoutLabeled(take(recordRow, 98), sourceAspectLabel_, sourceAspectCombo_);
     layoutLabeled(take(recordRow, 118), sourceWindowLabel_, sourceWindowButton_);
+    layoutLabeled(take(recordRow, 126), externalSourceLabel_, externalSourceButton_);
 }
 
 } // namespace SoundShape

@@ -11,7 +11,8 @@
 - Add record status/path feedback that fits the system UI.
 - Add export-size controls if editor-size recording is not enough.
 - Consider an audio include/exclude control if silent visual exports become common.
-- Evaluate Syphon or NDI as a stronger live-visuals bridge.
+- Smoke test Syphon External Source against current macOS live visual tools.
+- Evaluate NDI or a true virtual camera only if Syphon is not enough.
 
 ## Later
 

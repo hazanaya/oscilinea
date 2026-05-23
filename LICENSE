@@ -7,5 +7,6 @@ sublicense, and/or sell copies of this software without explicit written
 permission from the copyright holder.
 
 This project links against JUCE, which is licensed separately by Raw Material
-Software. See the JUCE license and this project's architecture notes for the
-current JUCE tier strategy.
+Software. It also includes Syphon-Framework as a source dependency under the
+Syphon Framework License in `extern/Syphon-Framework/License.txt`. See the
+architecture notes for dependency details.

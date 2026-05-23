@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 project(SoundShape VERSION 0.0.1 LANGUAGES C CXX)
 
 if(APPLE)
-    enable_language(OBJCXX)
+    enable_language(OBJC OBJCXX)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -18,6 +18,78 @@ endif()
 set(JUCE_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(JUCE_BUILD_EXTRAS   OFF CACHE BOOL "")
 add_subdirectory(extern/JUCE)
+
+if(APPLE)
+    set(SYPHON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern/Syphon-Framework")
+    set(SYPHON_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/syphon_include")
+
+    if(NOT EXISTS "${SYPHON_DIR}/SyphonOpenGLServer.m")
+        message(FATAL_ERROR "Syphon source is missing. Run: git submodule update --init --recursive")
+    endif()
+
+    file(MAKE_DIRECTORY "${SYPHON_INCLUDE_DIR}/Syphon")
+    file(GLOB SYPHON_HEADERS CONFIGURE_DEPENDS "${SYPHON_DIR}/*.h")
+    foreach(SYPHON_HEADER IN LISTS SYPHON_HEADERS)
+        get_filename_component(SYPHON_HEADER_NAME "${SYPHON_HEADER}" NAME)
+        configure_file("${SYPHON_HEADER}"
+                       "${SYPHON_INCLUDE_DIR}/Syphon/${SYPHON_HEADER_NAME}"
+                       COPYONLY)
+    endforeach()
+
+    set(SYPHON_OBJC_SOURCES
+        "${SYPHON_DIR}/SyphonCFMessageReceiver.m"
+        "${SYPHON_DIR}/SyphonCFMessageSender.m"
+        "${SYPHON_DIR}/SyphonGLShader.m"
+        "${SYPHON_DIR}/SyphonGLVertices.m"
+        "${SYPHON_DIR}/SyphonIOSurfaceImageCore.m"
+        "${SYPHON_DIR}/SyphonIOSurfaceImageLegacy.m"
+        "${SYPHON_DIR}/SyphonImageBase.m"
+        "${SYPHON_DIR}/SyphonMessageQueue.m"
+        "${SYPHON_DIR}/SyphonMessageReceiver.m"
+        "${SYPHON_DIR}/SyphonMessageSender.m"
+        "${SYPHON_DIR}/SyphonMessaging.m"
+        "${SYPHON_DIR}/SyphonOpenGLImage.m"
+        "${SYPHON_DIR}/SyphonOpenGLServer.m"
+        "${SYPHON_DIR}/SyphonPrivate.m"
+        "${SYPHON_DIR}/SyphonServerBase.m"
+        "${SYPHON_DIR}/SyphonServerConnectionManager.m"
+        "${SYPHON_DIR}/SyphonServerGLShader.m"
+        "${SYPHON_DIR}/SyphonServerGLVertices.m"
+        "${SYPHON_DIR}/SyphonServerRendererCoreGL.m"
+        "${SYPHON_DIR}/SyphonServerRendererGL.m"
+        "${SYPHON_DIR}/SyphonServerRendererLegacyGL.m")
+    set(SYPHON_C_SOURCES
+        "${SYPHON_DIR}/SyphonCGL.c"
+        "${SYPHON_DIR}/SyphonDispatch.c"
+        "${SYPHON_DIR}/SyphonOpenGLFunctions.c")
+
+    add_library(SyphonSource STATIC
+        ${SYPHON_OBJC_SOURCES}
+        ${SYPHON_C_SOURCES})
+    set(SYPHON_COMMON_OPTIONS
+        -fblocks
+        -include "${SYPHON_DIR}/Syphon_Prefix.pch"
+        -include libkern/OSAtomic.h
+        -include CoreVideo/CoreVideo.h
+        -Wno-deprecated-declarations)
+    set(SYPHON_OBJC_OPTIONS
+        -fobjc-arc
+        ${SYPHON_COMMON_OPTIONS})
+    set_source_files_properties(${SYPHON_OBJC_SOURCES}
+        PROPERTIES COMPILE_OPTIONS "${SYPHON_OBJC_OPTIONS}")
+    set_source_files_properties(${SYPHON_C_SOURCES}
+        PROPERTIES COMPILE_OPTIONS "${SYPHON_COMMON_OPTIONS}")
+    target_compile_definitions(SyphonSource PRIVATE
+        GL_SILENCE_DEPRECATION
+        SYPHON_CORE_SHARE)
+    target_include_directories(SyphonSource PUBLIC
+        "${SYPHON_DIR}"
+        "${SYPHON_INCLUDE_DIR}")
+    target_link_libraries(SyphonSource PUBLIC
+        "-framework Cocoa"
+        "-framework IOSurface"
+        "-framework OpenGL")
+endif()
 
 juce_add_plugin(SoundShape
     COMPANY_NAME                "Hazael Anaya"
@@ -59,23 +131,35 @@ target_sources(SoundShape PRIVATE
     src/ui/SystemLookAndFeel.h
     src/video/SourceWindow.cpp
     src/video/SourceWindow.h
+    src/video/SyphonPublisher.h
     src/video/VideoRecorder.h)
 
 if(APPLE)
-    target_sources(SoundShape PRIVATE src/video/VideoRecorder_mac.mm)
-    set_source_files_properties(src/video/VideoRecorder_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+    target_sources(SoundShape PRIVATE
+        src/video/SyphonPublisher_mac.mm
+        src/video/VideoRecorder_mac.mm)
+    set_source_files_properties(src/video/SyphonPublisher_mac.mm
+                                src/video/VideoRecorder_mac.mm
+                                PROPERTIES COMPILE_FLAGS "-fobjc-arc")
     target_link_libraries(SoundShape PRIVATE
+        SyphonSource
         "-framework AVFoundation"
         "-framework AudioToolbox"
+        "-framework Cocoa"
         "-framework CoreMedia"
-        "-framework CoreVideo")
+        "-framework CoreVideo"
+        "-framework IOSurface"
+        "-framework OpenGL")
 else()
-    target_sources(SoundShape PRIVATE src/video/VideoRecorder_stub.cpp)
+    target_sources(SoundShape PRIVATE
+        src/video/SyphonPublisher_stub.cpp
+        src/video/VideoRecorder_stub.cpp)
 endif()
 
 target_include_directories(SoundShape PRIVATE src)
 
 target_compile_definitions(SoundShape PUBLIC
+    GL_SILENCE_DEPRECATION
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0)

@@ -12,6 +12,7 @@
 #include "ui/Controls.h"
 #include "ui/SystemLookAndFeel.h"
 #include "video/SourceWindow.h"
+#include "video/SyphonPublisher.h"
 #include "video/VideoRecorder.h"
 
 namespace SoundShape {
@@ -66,6 +67,7 @@ private:
     void drainCapturedAudio(int maxChunks, bool showWarning = true);
     void promptToSaveCompletedRecording(const juce::File& captureFile);
     void toggleSourceWindow();
+    void toggleExternalSource();
     juce::File makeCaptureFile() const;
 
     PluginProcessor& processor_;
@@ -74,6 +76,7 @@ private:
     ControlPanel controls_;
     PanelToggleButton panelToggleButton_;
     juce::VBlankAttachment vblank_;
+    SyphonPublisher syphonPublisher_;
     VideoRecorder recorder_;
     juce::AudioBuffer<float> capturedAudioScratch_;
     std::unique_ptr<SourceWindow> sourceWindow_;
@@ -83,9 +86,11 @@ private:
     std::atomic<float>* huePtr_ = nullptr;
     float lastHue_ = -1.0f;
     double nextCaptureMs_ = 0.0;
+    double nextExternalSourceMs_ = 0.0;
     double recordStartMs_ = 0.0;
     int lastSourceAspect_ = -1;
     bool panelVisible_ = true;
+    juce::String externalSourceName_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

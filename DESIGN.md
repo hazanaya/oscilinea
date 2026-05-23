@@ -14,7 +14,7 @@ The panel should feel like system UI, not a themed hardware panel. The display c
 
 - **Pass-through audio.** No processing, no latency, no tonal change.
 - **Focused shape view.** One period-seeking mono display with robust fallback for noisy or polyphonic sources.
-- **Capture-first workflow.** Built-in `.mov` recording with plug-in audio and a separate source window suitable for Window Capture/source capture.
+- **Capture-first workflow.** Built-in `.mov` recording with plug-in audio, a separate source window suitable for Window Capture/source capture, and per-instance Syphon output for live visual tools.
 - **Personal new-instance look.** Users can save appearance defaults across instances without changing existing saved sessions.
 - **Independent project.** Own source tree, git history, docs, plug-in codes, and build artifacts.
 - **Mac-first implementation.** AU, VST3, and Standalone from one JUCE 8 CMake project.

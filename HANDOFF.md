@@ -11,11 +11,12 @@ Current scaffold includes:
 - JUCE 8 CMake plug-in target: AU, VST3, and Standalone.
 - Pass-through `PluginProcessor` with `ScopeFeed` audio-to-UI handoff and a recording-only audio FIFO.
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
-- Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, light/dark-safe captions, value text, and source controls, line styling, cycle-span glide control, recording, and a generic source window. The panel can be hidden or revealed with a centered bottom handle and generous hover target.
+- Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, light/dark-safe captions, value text, and source controls, line styling, cycle-span glide control, recording, a generic source window, and a per-instance Syphon External Source output. The panel can be hidden or revealed with a centered bottom handle and generous hover target.
 - Default appearance is a clean trace over a transparent background with no trail. Dark mode defaults to a white trace; light mode defaults to a dark neutral trace for contrast.
 - The Look row has a compact defaults menu. It can save the current appearance as the default for future new plug-in instances or reset back to built-in appearance defaults. Saved host sessions still reopen from their saved state.
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha. Recordings mux AAC audio for the signal passing through the plug-in.
 - Each recording uses a UUID-backed temporary filename in `~/Movies/Sound Shape Captures`, so separate plug-in instances can record at the same time without colliding.
+- Syphon is pinned as `extern/Syphon-Framework` and compiled into the macOS build as a server-side source publisher. External Source runs from the editor vblank loop and stops when that editor closes.
 - Docs, git metadata, license, and project handoff files.
 
 Verification:
@@ -28,9 +29,9 @@ Verification:
 
 ## Next Steps
 
-1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, Glide ranges from instant cycle-span changes to slow transitions, line-style changes update preset values without moving controls, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, and Source Window opens and updates.
+1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, Glide ranges from instant cycle-span changes to slow transitions, line-style changes update preset values without moving controls, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
 2. Install `pluginval` if needed and validate the VST3.
-3. Decide whether v0.2 should add Syphon/NDI/virtual-camera output beyond Window Capture/source capture.
+3. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
 
 ## Gotchas
 
@@ -41,4 +42,5 @@ Verification:
 - The audio thread only copies into `AudioCaptureBuffer` while recording; keep AVFoundation and file work on the message thread.
 - Transparent recording uses ProRes 4444. Do not attach H.264-only compression properties, such as average bitrate, to the ProRes writer input; AVFoundation throws an Objective-C exception for that.
 - Do not delete an existing output path when starting a recording. Concurrent instances must never be able to remove another instance's active temp file.
-- The source window is a practical capture surface, not a true system video device.
+- The source window and Syphon output are practical capture surfaces, not true system video devices.
+- External Source is editor-driven. Closing the plug-in editor tears down that instance's Syphon server.
