@@ -189,6 +189,7 @@ void ControlPanel::configureSlider(juce::Slider& slider)
     slider.setSliderStyle(juce::Slider::LinearHorizontal);
     slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 48, 20);
     slider.setNumDecimalPlacesToDisplay(2);
+    slider.setColour(juce::Slider::textBoxTextColourId, juce::Colour(captionColour));
     addAndMakeVisible(slider);
 }
 
