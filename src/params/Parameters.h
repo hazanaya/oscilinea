@@ -26,6 +26,7 @@ namespace ParamID
     inline constexpr const char* transparentBg = "transparent_background";
     inline constexpr const char* captureFps    = "capture_fps";
     inline constexpr const char* sourceAspect  = "source_aspect";
+    inline constexpr const char* displayFlip   = "display_flip";
 }
 
 class Parameters

@@ -23,7 +23,8 @@ namespace
         ParamID::bgSaturation,
         ParamID::bgBrightness,
         ParamID::bgAlpha,
-        ParamID::transparentBg
+        ParamID::transparentBg,
+        ParamID::displayFlip
     };
 
     juce::var getParameterValue(juce::AudioProcessorValueTreeState& state, const juce::String& paramID)

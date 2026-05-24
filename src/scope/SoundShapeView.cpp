@@ -201,6 +201,7 @@ SoundShapeView::SoundShapeView(const ScopeFeed& feed,
     pBgBrightness_ = apvts_.getRawParameterValue(ParamID::bgBrightness);
     pBgAlpha_ = apvts_.getRawParameterValue(ParamID::bgAlpha);
     pTransparentBg_ = apvts_.getRawParameterValue(ParamID::transparentBg);
+    pDisplayFlip_ = apvts_.getRawParameterValue(ParamID::displayFlip);
 
     constexpr int initialScratch = 16384;
     scratchL_.assign(initialScratch, 0.0f);
@@ -276,6 +277,7 @@ void SoundShapeView::tick()
     renderOptions_.glowAmount = pGlowAmount_->load(std::memory_order_relaxed);
     renderOptions_.traceStyle = static_cast<int>(pTraceStyle_->load(std::memory_order_relaxed));
     renderOptions_.thickness = pThickness_->load(std::memory_order_relaxed);
+    renderOptions_.displayFlip = static_cast<int>(pDisplayFlip_->load(std::memory_order_relaxed));
 
     if (pFreeze_->load(std::memory_order_relaxed) > 0.5f)
     {

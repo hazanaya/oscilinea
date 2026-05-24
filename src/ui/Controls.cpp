@@ -111,6 +111,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     configureLabel(fpsLabel_, "FPS");
     configureLabel(sourceAspectLabel_, "Aspect");
     configureLabel(lineStyleLabel_, "Line");
+    configureLabel(displayFlipLabel_, "Flip");
     configureLabel(levelLabel_, "Level");
     configureLabel(smoothingLabel_, "Smooth");
     configureLabel(cycleGlideLabel_, "Glide");
@@ -127,6 +128,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     addAndMakeVisible(fpsCombo_);
     addAndMakeVisible(sourceAspectCombo_);
     addAndMakeVisible(lineStyleCombo_);
+    addAndMakeVisible(displayFlipCombo_);
     addAndMakeVisible(traceColourButton_);
     addAndMakeVisible(backgroundColourButton_);
 
@@ -142,6 +144,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     populateChoiceCombo(fpsCombo_, apvts_, ParamID::captureFps);
     populateChoiceCombo(sourceAspectCombo_, apvts_, ParamID::sourceAspect);
     populateChoiceCombo(lineStyleCombo_, apvts_, ParamID::traceStyle);
+    populateChoiceCombo(displayFlipCombo_, apvts_, ParamID::displayFlip);
 
     recordButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     sourceWindowButton_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
@@ -162,6 +165,7 @@ ControlPanel::ControlPanel(juce::AudioProcessorValueTreeState& apvts)
     fpsAtt_ = std::make_unique<ComboAttachment>(apvts_, ParamID::captureFps, fpsCombo_);
     sourceAspectAtt_ = std::make_unique<ComboAttachment>(apvts_, ParamID::sourceAspect, sourceAspectCombo_);
     lineStyleAtt_ = std::make_unique<ComboAttachment>(apvts_, ParamID::traceStyle, lineStyleCombo_);
+    displayFlipAtt_ = std::make_unique<ComboAttachment>(apvts_, ParamID::displayFlip, displayFlipCombo_);
     levelAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::amplitudeDb, levelSlider_);
     smoothingAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::smoothing, smoothingSlider_);
     cycleGlideAtt_ = std::make_unique<SliderAttachment>(apvts_, ParamID::cycleGlide, cycleGlideSlider_);
@@ -658,6 +662,7 @@ void ControlPanel::resized()
     layoutColour(swatches, backgroundColourButton_, backgroundColourLabel_);
     layoutSwitch(take(lookRow, 112), transparentButton_);
     layoutLabeled(take(lookRow, 108), lineStyleLabel_, lineStyleCombo_);
+    layoutLabeled(take(lookRow, 78), displayFlipLabel_, displayFlipCombo_);
 
     const int lookSliderW = lookRow.getWidth() / 4;
     layoutLabeled(lookRow.removeFromLeft(lookSliderW).reduced(2, 0), thicknessLabel_, thicknessSlider_);

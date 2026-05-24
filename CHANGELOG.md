@@ -29,3 +29,4 @@ All notable changes to this project will be documented in this file.
 - Matched control captions and slider value text to the section labels so they remain readable in light mode.
 - Fixed the source window button text color so it remains readable in light mode.
 - Added a per-instance Syphon External Source output for direct capture in compatible live visual tools.
+- Added a Look-row Flip control for cheap X, Y, or X+Y display mirroring in the rendered and captured output.

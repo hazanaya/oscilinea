@@ -97,6 +97,8 @@ private:
     juce::Label sourceAspectLabel_;
     juce::ComboBox lineStyleCombo_;
     juce::Label lineStyleLabel_;
+    juce::ComboBox displayFlipCombo_;
+    juce::Label displayFlipLabel_;
 
     ColourDotButton traceColourButton_;
     juce::Label traceColourLabel_;
@@ -132,6 +134,7 @@ private:
     std::unique_ptr<ComboAttachment> fpsAtt_;
     std::unique_ptr<ComboAttachment> sourceAspectAtt_;
     std::unique_ptr<ComboAttachment> lineStyleAtt_;
+    std::unique_ptr<ComboAttachment> displayFlipAtt_;
     std::unique_ptr<SliderAttachment> levelAtt_;
     std::unique_ptr<SliderAttachment> smoothingAtt_;
     std::unique_ptr<SliderAttachment> cycleGlideAtt_;

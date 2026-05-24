@@ -155,6 +155,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
         juce::StringArray { "16:9", "1:1", "9:16", "Free" },
         0));
 
+    layout.add(std::make_unique<Choice>(
+        juce::ParameterID { ParamID::displayFlip, 1 },
+        "Flip",
+        juce::StringArray { "Off", "X", "Y", "X+Y" },
+        0));
+
     return layout;
 }
 

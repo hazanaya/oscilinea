@@ -18,6 +18,7 @@ struct RenderOptions
     float bgBrightness = 0.0f;
     float bgAlpha = 1.0f;
     float thickness = 2.0f;
+    int displayFlip = 0;
 };
 
 class SoundShapeRenderer

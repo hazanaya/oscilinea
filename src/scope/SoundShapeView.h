@@ -53,6 +53,7 @@ private:
     std::atomic<float>* pBgBrightness_ = nullptr;
     std::atomic<float>* pBgAlpha_ = nullptr;
     std::atomic<float>* pTransparentBg_ = nullptr;
+    std::atomic<float>* pDisplayFlip_ = nullptr;
 
     SoundShapeRenderer renderer_;
     RenderOptions renderOptions_;

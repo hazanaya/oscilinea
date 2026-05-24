@@ -56,6 +56,9 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
     const float halfH = area.getHeight() * 0.48f;
     const float x0 = area.getX();
     const float xSpan = area.getWidth();
+    const int flipMode = juce::jlimit(0, 3, options.displayFlip);
+    const bool flipX = flipMode == 1 || flipMode == 3;
+    const bool flipY = flipMode == 2 || flipMode == 3;
     const bool darkBg = options.bgBrightness < 0.5f;
     const auto colour = traceColour(options, darkBg);
 
@@ -68,8 +71,10 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
     for (int i = 0; i < count; i += stride)
     {
         const float t = static_cast<float>(i) / static_cast<float>(count - 1);
-        const float x = x0 + xSpan * t;
-        const float y = midY - halfH * juce::jlimit(-1.0f, 1.0f, mono[i] * gain);
+        const float x = flipX ? area.getRight() - xSpan * t
+                              : x0 + xSpan * t;
+        const float sample = juce::jlimit(-1.0f, 1.0f, mono[i] * gain);
+        const float y = midY + (flipY ? halfH * sample : -halfH * sample);
 
         if (first)
         {
