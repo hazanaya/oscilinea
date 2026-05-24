@@ -311,16 +311,16 @@ int ControlPanel::getLineStyleIndex() const
 
 void ControlPanel::applyLineStylePreset(int styleIndex)
 {
-    switch (juce::jlimit(0, 4, styleIndex))
+    switch (juce::jlimit(0, 7, styleIndex))
     {
-        case 1: // Glow
+        case 1: // Halo
             setFloatParam(ParamID::thickness, 2.0f);
             setFloatParam(ParamID::traceOpacity, 1.0f);
-            setFloatParam(ParamID::glowAmount, 0.28f);
+            setFloatParam(ParamID::glowAmount, 0.36f);
             break;
 
-        case 2: // Neon
-            setFloatParam(ParamID::thickness, 1.35f);
+        case 2: // Beam
+            setFloatParam(ParamID::thickness, 1.15f);
             setFloatParam(ParamID::traceOpacity, 1.0f);
             setFloatParam(ParamID::glowAmount, 0.82f);
             break;
@@ -337,6 +337,24 @@ void ControlPanel::applyLineStylePreset(int styleIndex)
             setFloatParam(ParamID::glowAmount, 0.0f);
             break;
 
+        case 5: // Wire
+            setFloatParam(ParamID::thickness, 0.75f);
+            setFloatParam(ParamID::traceOpacity, 1.0f);
+            setFloatParam(ParamID::glowAmount, 0.0f);
+            break;
+
+        case 6: // Bloom
+            setFloatParam(ParamID::thickness, 4.8f);
+            setFloatParam(ParamID::traceOpacity, 0.86f);
+            setFloatParam(ParamID::glowAmount, 1.0f);
+            break;
+
+        case 7: // Ribbon
+            setFloatParam(ParamID::thickness, 6.2f);
+            setFloatParam(ParamID::traceOpacity, 0.84f);
+            setFloatParam(ParamID::glowAmount, 0.22f);
+            break;
+
         case 0: // Clean
         default:
             setFloatParam(ParamID::thickness, 2.0f);
@@ -349,7 +367,7 @@ void ControlPanel::applyLineStylePreset(int styleIndex)
 void ControlPanel::updateAdvancedVisibility()
 {
     const int style = getLineStyleIndex();
-    const bool usesGlow = style == 1 || style == 2 || style == 3;
+    const bool usesGlow = style == 1 || style == 2 || style == 3 || style == 6 || style == 7;
     const bool transparent = transparentButton_.getToggleState()
                              || getBoolParam(ParamID::transparentBg, true);
 

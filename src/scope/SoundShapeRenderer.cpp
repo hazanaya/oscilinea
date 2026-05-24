@@ -87,9 +87,9 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
         }
     }
 
-    const float thickness = juce::jlimit(0.75f, 8.0f, options.thickness);
+    const float thickness = juce::jlimit(0.35f, 18.0f, options.thickness);
     const float glow = juce::jlimit(0.0f, 1.0f, options.glowAmount);
-    const int style = juce::jlimit(0, 4, options.traceStyle);
+    const int style = juce::jlimit(0, 7, options.traceStyle);
 
     auto strokePath = [&g, &path](juce::Colour c, float width,
                                   juce::PathStrokeType::JointStyle joint,
@@ -105,16 +105,16 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
             strokePath(colour, thickness, juce::PathStrokeType::curved, juce::PathStrokeType::butt);
             break;
 
-        case 2: // Neon
-            strokePath(colour.withMultipliedAlpha(0.10f + glow * 0.20f),
-                       thickness + 16.0f * glow,
+        case 2: // Beam
+            strokePath(colour.withMultipliedAlpha(0.08f + glow * 0.18f),
+                       thickness + 24.0f * glow,
                        juce::PathStrokeType::curved,
                        juce::PathStrokeType::butt);
-            strokePath(colour.withMultipliedAlpha(0.22f + glow * 0.18f),
-                       thickness + 7.0f * glow,
+            strokePath(colour.withMultipliedAlpha(0.20f + glow * 0.22f),
+                       thickness + 9.0f * glow,
                        juce::PathStrokeType::curved,
                        juce::PathStrokeType::butt);
-            strokePath(colour.brighter(0.45f), juce::jmax(0.75f, thickness * 0.42f),
+            strokePath(colour.brighter(0.40f), juce::jmax(0.35f, thickness * 0.34f),
                        juce::PathStrokeType::curved,
                        juce::PathStrokeType::butt);
             break;
@@ -139,10 +139,48 @@ void SoundShapeRenderer::drawShape(juce::Graphics& g,
                        juce::PathStrokeType::butt);
             break;
 
-        case 1: // Glow
+        case 5: // Wire
+            strokePath(colour.withMultipliedAlpha(0.34f),
+                       juce::jmax(0.35f, thickness * 0.50f),
+                       juce::PathStrokeType::mitered,
+                       juce::PathStrokeType::butt);
+            strokePath(colour, juce::jmax(0.35f, thickness * 0.22f),
+                       juce::PathStrokeType::mitered,
+                       juce::PathStrokeType::butt);
+            break;
+
+        case 6: // Bloom
+            strokePath(colour.withMultipliedAlpha(0.08f + glow * 0.16f),
+                       thickness + 28.0f * glow,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.withMultipliedAlpha(0.18f + glow * 0.18f),
+                       thickness + 13.0f * glow,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.withMultipliedAlpha(0.86f), thickness,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            break;
+
+        case 7: // Ribbon
+            strokePath(colour.withMultipliedAlpha(0.18f),
+                       thickness + 4.8f,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.withMultipliedAlpha(0.70f),
+                       thickness + 1.8f,
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            strokePath(colour.brighter(0.28f), juce::jmax(0.35f, thickness * 0.36f),
+                       juce::PathStrokeType::curved,
+                       juce::PathStrokeType::rounded);
+            break;
+
+        case 1: // Halo
         default:
             strokePath(colour.withMultipliedAlpha(0.14f + glow * 0.22f),
-                       thickness + 4.0f + glow * 8.0f,
+                       thickness + 5.0f + glow * 12.0f,
                        juce::PathStrokeType::curved,
                        juce::PathStrokeType::butt);
             strokePath(colour, thickness,

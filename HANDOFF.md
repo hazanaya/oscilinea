@@ -11,7 +11,7 @@ Current scaffold includes:
 - JUCE 8 CMake plug-in target: AU, VST3, and Standalone.
 - Pass-through `PluginProcessor` with `ScopeFeed` audio-to-UI handoff and a recording-only audio FIFO.
 - Focused Sound Shape display with mono period detection, cycle averaging, smoothing, and fallback drawing.
-- Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, light/dark-safe captions, value text, and source controls, line styling, X/Y display flipping, cycle-span glide control, recording, a generic source window, and a per-instance Syphon External Source output. The panel can be hidden or revealed with a centered bottom handle and generous hover target.
+- Three-row system-style bottom panel: Signal, Look, and Record. It includes compact color dots, fixed-position advanced controls, light/dark-safe captions, value text, and source controls, expanded line styling, X/Y display flipping, extended cycle-span glide control, recording, a generic source window, and a per-instance Syphon External Source output. The panel is initially hidden and can be revealed with a centered bottom handle and generous hover target.
 - Default appearance is a clean trace over a transparent background with no trail. Dark mode defaults to a white trace; light mode defaults to a dark neutral trace for contrast.
 - The Look row has a compact defaults menu. It can save the current appearance as the default for future new plug-in instances or reset back to built-in appearance defaults. Saved host sessions still reopen from their saved state.
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha. Recordings mux AAC audio for the signal passing through the plug-in.
@@ -29,7 +29,7 @@ Verification:
 
 ## Next Steps
 
-1. Smoke test Standalone/Logic: confirm audio pass-through, the autohiding panel toggle is discoverable, Glide ranges from instant cycle-span changes to slow transitions, line-style changes update preset values without moving controls, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
+1. Smoke test Standalone/Logic: confirm audio pass-through, the initially hidden panel toggle is discoverable, Glide ranges from instant cycle-span changes to long transitions, line-style changes update preset values without moving controls, Clean and Ink retain their expected looks, the extra line presets and wider Weight range feel useful, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
 2. Install `pluginval` if needed and validate the VST3.
 3. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
 

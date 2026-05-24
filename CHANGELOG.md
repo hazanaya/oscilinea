@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - Polished the panel into Signal, Look, and Record rows with quieter accent chrome, compact color dots, fixed disabled advanced controls, an Aspect label, two-decimal slider readouts, and recording timecode.
 - Added section dividers, aligned the Record row control height with the rest of the panel, and moved the hover-only panel chevron farther from the panel edge.
 - Smoothed large period changes so the Sound Shape view glides between cycle spans instead of snapping between zoom levels.
-- Added a Cycle Glide parameter and Signal-row Glide control, ranging from instant cycle-span changes to 4-second transitions.
+- Added a Cycle Glide parameter and Signal-row Glide control, now ranging from instant cycle-span changes to 12-second transitions.
 - Fixed a host crash when starting transparent recordings by using ProRes-safe AVFoundation settings and converting encoder exceptions into normal recording errors.
 - Added AAC audio muxing to `.mov` recordings for the audio passing through the plug-in.
 - Replaced the panel chevron with a centered bottom handle and larger hover target.
@@ -30,3 +30,4 @@ All notable changes to this project will be documented in this file.
 - Fixed the source window button text color so it remains readable in light mode.
 - Added a per-instance Syphon External Source output for direct capture in compatible live visual tools.
 - Added a Look-row Flip control for cheap X, Y, or X+Y display mirroring in the rendered and captured output.
+- Expanded the Line menu with additional presets while preserving Clean and Ink, widened Cycle Glide and trace Weight ranges, and made the control panel initially hidden.

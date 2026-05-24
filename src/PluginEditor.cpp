@@ -80,7 +80,7 @@ PluginEditor::PluginEditor(PluginProcessor& pluginProcessor)
     panelToggleButton_.onClick = [this]() { setPanelVisible(! panelVisible_); };
     panelToggleButton_.onHoverChanged = [this](bool hovered) { updatePanelToggleChrome(hovered); };
     addAndMakeVisible(panelToggleButton_);
-    setPanelVisible(true);
+    setPanelVisible(false);
     updatePanelToggleChrome(false);
 
     setSize(940, 720);

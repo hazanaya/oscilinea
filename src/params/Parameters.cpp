@@ -51,7 +51,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
     layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::cycleGlide, 1 },
         "Cycle Glide",
-        Range { 0.0f, 4.0f, 0.01f },
+        Range { 0.0f, 12.0f, 0.01f },
         0.50f,
         juce::String { "s" }));
 
@@ -65,14 +65,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::makeLayout()
     layout.add(std::make_unique<Float>(
         juce::ParameterID { ParamID::thickness, 1 },
         "Thickness",
-        Range { 0.75f, 6.0f, 0.05f },
+        Range { 0.35f, 14.0f, 0.05f },
         2.0f,
         juce::String { "px" }));
 
     layout.add(std::make_unique<Choice>(
         juce::ParameterID { ParamID::traceStyle, 1 },
         "Line",
-        juce::StringArray { "Clean", "Glow", "Neon", "Soft", "Ink" },
+        juce::StringArray { "Clean", "Halo", "Beam", "Soft", "Ink", "Wire", "Bloom", "Ribbon" },
         0));
 
     layout.add(std::make_unique<Float>(
