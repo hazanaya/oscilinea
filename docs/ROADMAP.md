@@ -2,7 +2,7 @@
 
 ## Now
 
-- Build the independent Sound Shape plug-in.
+- Build the independent Oscilinea plug-in.
 - Verify AU/VST3/Standalone builds.
 - Smoke test Record and Source Window in Standalone.
 

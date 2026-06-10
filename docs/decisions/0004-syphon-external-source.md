@@ -20,7 +20,7 @@ Add a macOS-only Syphon External Source output:
 
 ## Consequences
 
-- Multiple open plug-in editors can publish separate Syphon sources such as `Sound Shape 1` and `Sound Shape 2`.
+- Multiple open plug-in editors can publish separate Syphon sources such as `Oscilinea 1` and `Oscilinea 2`.
 - Syphon publishing remains off the audio thread and shares the same rendered display path as recording/source-window capture.
 - External Source stops when the plug-in editor closes; keeping a source alive without an editor would require a separate headless render loop owned outside the editor.
 - OpenGL is used only as the Syphon bridge because Syphon's OpenGL server can be compiled from source with command-line tools. A future Metal bridge could reduce deprecated API use if the project adopts a Metal render path.

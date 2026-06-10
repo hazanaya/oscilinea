@@ -14,7 +14,7 @@ For v0.1:
 
 - Record the rendered display to `.mov` on macOS using AVFoundation.
 - Mux audio passing through the plug-in into those recordings.
-- Provide a separate `Sound Shape Source` window for Window Capture/source capture.
+- Provide a separate `Oscilinea Source` window for Window Capture/source capture.
 - Document true virtual camera, Syphon, or NDI output as a future option.
 
 ## Consequences

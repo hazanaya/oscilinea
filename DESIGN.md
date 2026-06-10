@@ -1,4 +1,4 @@
-# Sound Shape - Design Document
+# Oscilinea - Design Document
 
 ## One-Line Pitch
 
@@ -6,7 +6,7 @@ A focused macOS audio visualizer plug-in that renders the living shape of a soun
 
 ## Vision
 
-Sound Shape is the display-only sibling of BasicOsc. It removes the full oscilloscope surface and keeps the thing that feels most useful while designing synth sounds: a steady, readable contour that morphs with oscillator shape, filtering, PWM, distortion, and dynamics.
+Oscilinea is the display-only sibling of BasicOsc. It removes the full oscilloscope surface and keeps the thing that feels most useful while designing synth sounds: a steady, readable contour that morphs with oscillator shape, filtering, PWM, distortion, and dynamics.
 
 The panel should feel like system UI, not a themed hardware panel. The display can be expressive; the controls should be quiet, familiar, and fast.
 
