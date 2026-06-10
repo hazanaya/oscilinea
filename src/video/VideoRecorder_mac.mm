@@ -446,17 +446,24 @@ juce::Result VideoRecorder::stop()
     if (impl_->audioInput != nil)
         [impl_->audioInput markAsFinished];
 
+    // The block must capture the writer itself, not impl_: if the wait below
+    // times out, the handler can still fire after this recorder is destroyed.
+    AVAssetWriter* writer = impl_->writer;
     __block BOOL success = YES;
     dispatch_semaphore_t sema = dispatch_semaphore_create(0);
 
-    [impl_->writer finishWritingWithCompletionHandler:^{
-        success = impl_->writer.status == AVAssetWriterStatusCompleted;
+    [writer finishWritingWithCompletionHandler:^{
+        success = writer.status == AVAssetWriterStatusCompleted;
         dispatch_semaphore_signal(sema);
     }];
 
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    const auto timeout = dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC);
+    const bool finishedInTime = dispatch_semaphore_wait(sema, timeout) == 0;
 
     impl_->clearHandles();
+
+    if (! finishedInTime)
+        return juce::Result::fail("The recording did not finish writing in time.");
 
     return success ? juce::Result::ok()
                    : juce::Result::fail("AVAssetWriter did not finish successfully.");
