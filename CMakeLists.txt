@@ -121,10 +121,10 @@ target_sources(Oscilinea PRIVATE
     src/dsp/ScopeFeed.h
     src/params/Parameters.cpp
     src/params/Parameters.h
-    src/scope/OscilineaRenderer.cpp
-    src/scope/OscilineaRenderer.h
-    src/scope/OscilineaView.cpp
-    src/scope/OscilineaView.h
+    src/scope/SoundShapeRenderer.cpp
+    src/scope/SoundShapeRenderer.h
+    src/scope/SoundShapeView.cpp
+    src/scope/SoundShapeView.h
     src/ui/Controls.cpp
     src/ui/Controls.h
     src/ui/SystemLookAndFeel.cpp
