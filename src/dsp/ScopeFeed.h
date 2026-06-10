@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
             return;
 
         auto& c = *channels_[static_cast<std::size_t>(channel)];
-        const int pos = c.writePos.load(std::memory_order_relaxed);
+        const auto pos = c.writePos.load(std::memory_order_relaxed);
 
         for (int i = 0; i < numSamples; ++i)
             c.buffer[static_cast<std::size_t>((pos + i) & mask_)] = src[i];
@@ -44,11 +45,11 @@ public:
             return 0;
 
         const auto& c = *channels_[static_cast<std::size_t>(channel)];
-        const int end = c.writePos.load(std::memory_order_acquire);
-        const int firstValid = juce::jmax(0, end - capacity_);
-        const int requestedStart = end - numSamplesOut;
-        const int actualStart = juce::jmax(requestedStart, firstValid);
-        const int leadingZeros = actualStart - requestedStart;
+        const auto end = c.writePos.load(std::memory_order_acquire);
+        const auto firstValid = juce::jmax<std::int64_t>(0, end - capacity_);
+        const auto requestedStart = end - numSamplesOut;
+        const auto actualStart = juce::jmax(requestedStart, firstValid);
+        const int leadingZeros = static_cast<int>(actualStart - requestedStart);
 
         for (int i = 0; i < leadingZeros; ++i)
             dest[i] = 0.0f;
@@ -67,7 +68,7 @@ private:
             : buffer(static_cast<std::size_t>(capacity), 0.0f) {}
 
         std::vector<float> buffer;
-        std::atomic<int> writePos { 0 };
+        std::atomic<std::int64_t> writePos { 0 };
     };
 
     std::vector<std::unique_ptr<Channel>> channels_;
