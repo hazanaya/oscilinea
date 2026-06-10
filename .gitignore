@@ -27,6 +27,9 @@ DerivedData/
 *.vst3
 build/**/*.app
 
+# Packaging output
+dist/
+
 # Tooling
 *.log
 __pycache__/
