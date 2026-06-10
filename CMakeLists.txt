@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(SoundShape VERSION 0.0.1 LANGUAGES C CXX)
+project(Oscilinea VERSION 0.0.1 LANGUAGES C CXX)
 
 if(APPLE)
     enable_language(OBJC OBJCXX)
@@ -91,14 +91,14 @@ if(APPLE)
         "-framework OpenGL")
 endif()
 
-juce_add_plugin(SoundShape
+juce_add_plugin(Oscilinea
     COMPANY_NAME                "Hazael Anaya"
     COMPANY_EMAIL               "hazael.anaya@gmail.com"
     PLUGIN_MANUFACTURER_CODE    Hzny
     PLUGIN_CODE                 Sshp
-    BUNDLE_ID                   com.hazaelanaya.soundshape
-    PLUGIN_NAME                 "Sound Shape"
-    PRODUCT_NAME                "Sound Shape"
+    BUNDLE_ID                   com.hazaelanaya.oscilinea
+    PLUGIN_NAME                 "Oscilinea"
+    PRODUCT_NAME                "Oscilinea"
     FORMATS                     AU VST3 Standalone
     IS_SYNTH                    FALSE
     NEEDS_MIDI_INPUT            FALSE
@@ -110,7 +110,7 @@ juce_add_plugin(SoundShape
     AU_MAIN_TYPE                "kAudioUnitType_Effect"
     DESCRIPTION                 "Focused sound-shape visualizer with capture tools")
 
-target_sources(SoundShape PRIVATE
+target_sources(Oscilinea PRIVATE
     src/PluginProcessor.cpp
     src/PluginProcessor.h
     src/PluginEditor.cpp
@@ -121,10 +121,10 @@ target_sources(SoundShape PRIVATE
     src/dsp/ScopeFeed.h
     src/params/Parameters.cpp
     src/params/Parameters.h
-    src/scope/SoundShapeRenderer.cpp
-    src/scope/SoundShapeRenderer.h
-    src/scope/SoundShapeView.cpp
-    src/scope/SoundShapeView.h
+    src/scope/OscilineaRenderer.cpp
+    src/scope/OscilineaRenderer.h
+    src/scope/OscilineaView.cpp
+    src/scope/OscilineaView.h
     src/ui/Controls.cpp
     src/ui/Controls.h
     src/ui/SystemLookAndFeel.cpp
@@ -135,13 +135,13 @@ target_sources(SoundShape PRIVATE
     src/video/VideoRecorder.h)
 
 if(APPLE)
-    target_sources(SoundShape PRIVATE
+    target_sources(Oscilinea PRIVATE
         src/video/SyphonPublisher_mac.mm
         src/video/VideoRecorder_mac.mm)
     set_source_files_properties(src/video/SyphonPublisher_mac.mm
                                 src/video/VideoRecorder_mac.mm
                                 PROPERTIES COMPILE_FLAGS "-fobjc-arc")
-    target_link_libraries(SoundShape PRIVATE
+    target_link_libraries(Oscilinea PRIVATE
         SyphonSource
         "-framework AVFoundation"
         "-framework AudioToolbox"
@@ -151,20 +151,20 @@ if(APPLE)
         "-framework IOSurface"
         "-framework OpenGL")
 else()
-    target_sources(SoundShape PRIVATE
+    target_sources(Oscilinea PRIVATE
         src/video/SyphonPublisher_stub.cpp
         src/video/VideoRecorder_stub.cpp)
 endif()
 
-target_include_directories(SoundShape PRIVATE src)
+target_include_directories(Oscilinea PRIVATE src)
 
-target_compile_definitions(SoundShape PUBLIC
+target_compile_definitions(Oscilinea PUBLIC
     GL_SILENCE_DEPRECATION
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
-target_link_libraries(SoundShape
+target_link_libraries(Oscilinea
     PRIVATE
         juce::juce_audio_utils
         juce::juce_dsp

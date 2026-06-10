@@ -6,6 +6,7 @@ namespace SoundShape::AppearanceDefaults {
 
 namespace
 {
+    // Kept from the original product name so existing defaults files still parse.
     constexpr const char* rootType = "SOUND_SHAPE_DEFAULTS";
     constexpr const char* versionProperty = "version";
     constexpr int currentVersion = 1;
@@ -71,7 +72,7 @@ namespace
 juce::File getDefaultsFile()
 {
     return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
-        .getChildFile("Sound Shape")
+        .getChildFile("Oscilinea")
         .getChildFile("New Instance Defaults.xml");
 }
 

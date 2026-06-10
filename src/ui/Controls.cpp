@@ -427,7 +427,7 @@ void ControlPanel::showDefaultsMenu()
             juce::NativeMessageBox::showMessageBoxAsync(
                 actionResult.wasOk() ? juce::MessageBoxIconType::InfoIcon
                                      : juce::MessageBoxIconType::WarningIcon,
-                "Sound Shape",
+                "Oscilinea",
                 actionResult.wasOk() ? successMessage : actionResult.getErrorMessage(),
                 safeThis.getComponent());
         });

@@ -3,7 +3,7 @@
 namespace SoundShape {
 
 SourceWindow::SourceWindow()
-    : juce::DocumentWindow("Sound Shape Source",
+    : juce::DocumentWindow("Oscilinea Source",
                            juce::Colours::black,
                            juce::DocumentWindow::closeButton
                                | juce::DocumentWindow::minimiseButton,

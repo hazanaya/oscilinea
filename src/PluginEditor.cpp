@@ -21,7 +21,7 @@ namespace
 
     juce::String makeExternalSourceName()
     {
-        return "Sound Shape " + juce::String(nextExternalSourceIndex.fetch_add(1));
+        return "Oscilinea " + juce::String(nextExternalSourceIndex.fetch_add(1));
     }
 }
 
@@ -149,13 +149,13 @@ void PluginEditor::updatePanelToggleChrome(bool hovered)
 juce::File PluginEditor::makeCaptureFile() const
 {
     auto folder = juce::File::getSpecialLocation(juce::File::userMoviesDirectory)
-                    .getChildFile("Sound Shape Captures");
+                    .getChildFile("Oscilinea Captures");
 
     folder.createDirectory();
 
     const auto stamp = juce::Time::getCurrentTime().formatted("%Y-%m-%d %H.%M.%S");
     const auto nonce = juce::Uuid().toString().substring(0, 8);
-    return folder.getChildFile("Sound Shape " + stamp + " " + nonce + ".mov");
+    return folder.getChildFile("Oscilinea " + stamp + " " + nonce + ".mov");
 }
 
 void PluginEditor::toggleRecording()
@@ -173,7 +173,7 @@ void PluginEditor::toggleRecording()
         if (result.failed())
         {
             juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
-                                                        "Sound Shape",
+                                                        "Oscilinea",
                                                         result.getErrorMessage(),
                                                         this);
             return;
@@ -213,7 +213,7 @@ void PluginEditor::beginRecording()
     }
 
     juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
-                                                "Sound Shape",
+                                                "Oscilinea",
                                                 result.getErrorMessage(),
                                                 this);
 }
@@ -232,7 +232,7 @@ void PluginEditor::drainCapturedAudio(int maxChunks, bool showWarning)
             if (showWarning)
             {
                 juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
-                                                            "Sound Shape",
+                                                            "Oscilinea",
                                                             result.getErrorMessage(),
                                                             this);
             }
@@ -246,7 +246,7 @@ void PluginEditor::promptToSaveCompletedRecording(const juce::File& captureFile)
     if (! captureFile.existsAsFile())
         return;
 
-    captureChooser_ = std::make_unique<juce::FileChooser>("Save Sound Shape recording",
+    captureChooser_ = std::make_unique<juce::FileChooser>("Save Oscilinea recording",
                                                           captureFile,
                                                           "*.mov");
 
@@ -275,7 +275,7 @@ void PluginEditor::promptToSaveCompletedRecording(const juce::File& captureFile)
             if (! captureFile.replaceFileIn(file))
             {
                 juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
-                                                            "Sound Shape",
+                                                            "Oscilinea",
                                                             "The recording could not be moved to the selected location.",
                                                             safeThis.getComponent());
             }
@@ -323,7 +323,7 @@ void PluginEditor::toggleExternalSource()
         syphonPublisher_.stop();
         controls_.setExternalSourceOpen(false);
         juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
-                                                    "Sound Shape",
+                                                    "Oscilinea",
                                                     result.getErrorMessage(),
                                                     this);
         return;
@@ -396,7 +396,7 @@ void PluginEditor::onVBlank()
                 syphonPublisher_.stop();
                 controls_.setExternalSourceOpen(false);
                 juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
-                                                            "Sound Shape",
+                                                            "Oscilinea",
                                                             result.getErrorMessage(),
                                                             this);
             }

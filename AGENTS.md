@@ -12,6 +12,7 @@ This is a standalone JUCE plug-in project. Read this file before editing code.
 ## Working Conventions
 
 - Keep this project independent from `BasicOsc`. You may read `BasicOsc` as reference, but do not write into it while working here.
+- The public product name is Oscilinea. Internal C++ names (`namespace SoundShape`, `SoundShapeView`, file names, the saved-defaults XML tag) deliberately keep the original working name; rename only user-facing strings and build identity.
 - Preserve the plug-in identity codes once released. `PLUGIN_CODE`, `PLUGIN_MANUFACTURER_CODE`, `BUNDLE_ID`, and parameter IDs are host/session contracts.
 - The audio thread is pass-through only. Do not allocate, lock, log, access files, record video, open windows, or trigger repaint from `processBlock`.
 - The only audio-to-UI handoff is `SoundShape::ScopeFeed`, a lock-free latest-sample ring buffer.
@@ -31,5 +32,5 @@ cmake --build build --config Release -j
 
 ```bash
 auval -v aufx Sshp Hzny
-pluginval --strictness-level 5 build/SoundShape_artefacts/Release/VST3/Sound\\ Shape.vst3
+pluginval --strictness-level 5 build/Oscilinea_artefacts/Release/VST3/Oscilinea.vst3
 ```
