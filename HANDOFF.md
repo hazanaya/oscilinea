@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-05-25
+Last updated: 2026-06-10
 
 ## Where Things Stand
 
@@ -17,22 +17,23 @@ Current scaffold includes:
 - macOS AVFoundation `.mov` recorder. Record starts immediately, shows a red running timecode while armed, and asks where to save after recording ends. Opaque captures use H.264; transparent-background captures request ProRes 4444 for alpha. Recordings mux AAC audio for the signal passing through the plug-in.
 - Each recording uses a UUID-backed temporary filename in `~/Movies/Oscilinea Captures`, so separate plug-in instances can record at the same time without colliding.
 - Syphon is pinned as `extern/Syphon-Framework` and compiled into the macOS build as a server-side source publisher. External Source runs from the editor vblank loop and stops when that editor closes.
+- Build, bundle, and user-facing identity all use Oscilinea. The plug-in identity codes stay `Sshp`/`Hzny`, and internal C++ names deliberately keep the original `SoundShape` working name.
+- `scripts/package.sh` assembles the distributable beta folder and zip in `dist/` from the current Release build, including install scripts, checksums, and validation results.
 - Docs, git metadata, license, and project handoff files.
 
 Verification:
 
-- Release build succeeds for AU, VST3, and Standalone.
-- Build copies AU and VST3 to the user plug-in folders.
+- Clean universal Release build succeeds for AU, VST3, and Standalone under the Oscilinea name.
+- Build copies AU and VST3 to the user plug-in folders; stale Sound Shape copies were removed from this machine.
 - `auval -v aufx Sshp Hzny` passes.
-- `pluginval` was not available in `PATH`.
+- `pluginval --strictness-level 5` passes on the VST3 (pluginval 1.0.4).
 - Repository scan contains no forbidden hardware-reference terms.
 
 ## Next Steps
 
-1. Align the code/build/package identity with Oscilinea before sending the next distributable beta.
-2. Smoke test Standalone/Logic: confirm audio pass-through, the initially hidden panel toggle is discoverable, Glide ranges from instant cycle-span changes to long transitions, line-style changes update preset values without moving controls, Clean and Ink retain their expected looks, the extra line presets and wider Weight range feel useful, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
-3. Install `pluginval` if needed and validate the VST3.
-4. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
+1. Smoke test Standalone/Logic: confirm audio pass-through, the initially hidden panel toggle is discoverable, Glide ranges from instant cycle-span changes to long transitions, line-style changes update preset values without moving controls, Clean and Ink retain their expected looks, the extra line presets and wider Weight range feel useful, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
+2. Send the first Oscilinea beta package once smoke testing looks good. No beta has ever been distributed; identity values and parameter IDs freeze once one is.
+3. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
 
 ## Gotchas
 
@@ -45,3 +46,5 @@ Verification:
 - Do not delete an existing output path when starting a recording. Concurrent instances must never be able to remove another instance's active temp file.
 - The source window and Syphon output are practical capture surfaces, not true system video devices.
 - External Source is editor-driven. Closing the plug-in editor tears down that instance's Syphon server.
+- CMake `target_sources` paths use the internal `SoundShape` file names; a blanket SoundShape-to-Oscilinea replace breaks the build.
+- Recorder stop waits at most ten seconds for AVFoundation to finalize, then fails with a normal recording error instead of hanging the editor.

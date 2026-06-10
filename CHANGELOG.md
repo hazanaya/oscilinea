@@ -35,3 +35,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Renamed project documentation and product copy to Oscilinea after lightweight name research.
+- Renamed the build targets, bundle ID, and user-facing strings to Oscilinea. The plug-in identity codes (`Sshp`/`Hzny`) and parameter IDs are unchanged; internal C++ names deliberately keep the original working name.
+- New-instance appearance defaults now live in the `Oscilinea` application support folder.
+
+### Fixed
+
+- Widened the scope feed write positions to 64-bit so displays stay correct through multi-day continuous sessions.
+- Stopping a recording now gives up with an error after ten seconds instead of hanging the editor if the encoder never finishes.
