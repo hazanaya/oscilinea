@@ -29,12 +29,15 @@ Verification:
 - `auval -v aufx Sshp Hzny` passes.
 - `pluginval --strictness-level 5` passes on the VST3 (pluginval 1.0.4).
 - Repository scan contains no forbidden hardware-reference terms.
+- Developer ID signing is set up on the build machine (paid team `8GPYZ947VY`; both Developer ID certs valid to 2031; `notarytool` profile `oscilinea-notary` stored). Private signing keys are backed up at `~/oscilinea-signing/` (machine-local, not in git).
+- The first signed + notarized installer was built end to end: `./scripts/release.sh` produced `dist/Oscilinea-…-a2fa8dd.pkg`, notarization was Accepted and stapled, and `spctl --assess --type install` reports `source=Notarized Developer ID`.
+- `otool -L` confirms AU, VST3, and Standalone link only macOS system frameworks (Syphon is statically linked); end users need nothing beyond the installer.
 
 ## Next Steps
 
-1. Smoke test Standalone/Logic: confirm audio pass-through, the initially hidden panel toggle is discoverable, Glide ranges from instant cycle-span changes to long transitions, line-style changes update preset values without moving controls, Clean and Ink retain their expected looks, the extra line presets and wider Weight range feel useful, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
-2. One-time signing setup on the build machine: create the **Developer ID Application** and **Developer ID Installer** certificates and store a `notarytool` profile named `oscilinea-notary`. Steps are in `docs/DISTRIBUTION.md`. Only an "Apple Development" cert is installed today, which cannot be used for distribution. After that, `./scripts/release.sh` produces the shippable installer.
-3. Send the first Oscilinea beta installer once smoke testing and signing setup are done. No beta has ever been distributed; identity values and parameter IDs freeze once one is.
+1. Smoke test Standalone/Logic: confirm audio pass-through, the initially hidden panel toggle is discoverable, Glide ranges from instant cycle-span changes to long transitions, line-style changes update preset values without moving controls, Clean and Ink retain their expected looks, the extra line presets and wider Weight range feel useful, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances. Also confirm the standalone's first-launch microphone prompt appears and is accepted.
+2. Send the first Oscilinea beta installer (`dist/Oscilinea-…-a2fa8dd.pkg`) once smoke testing looks good. No beta has ever been distributed; identity values and parameter IDs freeze once one is.
+3. Future releases are one command: `./scripts/release.sh` (see `docs/DISTRIBUTION.md` → "The update loop"). Bump `project(Oscilinea VERSION …)` for notable releases.
 4. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
 
 ## Gotchas
