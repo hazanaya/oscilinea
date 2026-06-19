@@ -17,6 +17,25 @@ file to friends (AirDrop, email, a shared link — your call).
 
 ---
 
+## The update loop (every time you ship a new version)
+
+This is the routine you repeat after a friend gives feedback and you make
+changes. Nothing to memorize beyond these three steps:
+
+1. *(Optional, for a notable release)* bump the version in `CMakeLists.txt` —
+   the line `project(Oscilinea VERSION x.y.z ...)`.
+2. Run `./scripts/release.sh` and wait a few minutes.
+3. Send the new `.pkg` from `dist/`. Friends **double-click it to update** — it
+   replaces the old version in place and their DAW projects keep working.
+
+You never redo certificates or notarization; that setup is one-time (see below)
+and the certificates are valid until 2031. Friends need **nothing else** — no
+Syphon, no extra downloads; everything is built into the installer. Full detail
+and command options are in [Shipping a release](#shipping-a-release-every-time)
+further down.
+
+---
+
 ## Background: the two halves of "Apple Developer ID"
 
 Joining the Apple Developer Program gives you a **membership**. It does *not*

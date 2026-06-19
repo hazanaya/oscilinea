@@ -42,9 +42,16 @@ To produce a signed, notarized installer to share with others:
 
 This builds a universal Release, signs every format with your Developer ID,
 wraps them in a single `.pkg`, notarizes it with Apple, and writes the result to
-`dist/`. Friends double-click the `.pkg` to install (no security warnings) and
-double-click a newer one to update. First-time certificate setup and the full
-runbook are in [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md).
+`dist/`.
+
+**Shipping an update** (the loop after each round of feedback):
+
+1. Make changes; bump `project(Oscilinea VERSION x.y.z ...)` in `CMakeLists.txt` for a notable release.
+2. Run `./scripts/release.sh`.
+3. Send the new `.pkg` from `dist/`. Friends double-click it to install or update — no security warnings, and existing DAW projects keep working.
+
+Certificates and notarization are set up once and never repeated. First-time
+setup and the full runbook are in [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md).
 
 `scripts/package.sh` produces the older unsigned zip and is kept only for quick
 local testing.
