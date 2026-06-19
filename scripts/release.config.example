@@ -1,0 +1,19 @@
+# Oscilinea release configuration (optional overrides)
+#
+# Copy this file to scripts/release.config and uncomment lines only if the
+# automatic keychain detection in scripts/release.sh picks the wrong identity.
+# In the normal case you do NOT need this file at all -- the script finds your
+# Developer ID certificates and notarization profile on its own.
+#
+# scripts/release.config is gitignored: it must never be committed.
+
+# Full certificate names, exactly as shown by:
+#   security find-identity -v            (for the Installer cert)
+#   security find-identity -v -p codesigning   (for the Application cert)
+# Distribution uses your paid team 8GPYZ947VY (not the personal team J2BHY3YDKL).
+# DEV_ID_APP="Developer ID Application: Jorge Hazael Anaya (8GPYZ947VY)"
+# DEV_ID_INSTALLER="Developer ID Installer: Jorge Hazael Anaya (8GPYZ947VY)"
+
+# Name of the notarization credential profile stored in your keychain via
+#   xcrun notarytool store-credentials <name> ...
+# NOTARY_PROFILE="oscilinea-notary"

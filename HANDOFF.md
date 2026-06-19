@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-06-10
+Last updated: 2026-06-19
 
 ## Where Things Stand
 
@@ -18,7 +18,8 @@ Current scaffold includes:
 - Each recording uses a UUID-backed temporary filename in `~/Movies/Oscilinea Captures`, so separate plug-in instances can record at the same time without colliding.
 - Syphon is pinned as `extern/Syphon-Framework` and compiled into the macOS build as a server-side source publisher. External Source runs from the editor vblank loop and stops when that editor closes.
 - Build, bundle, and user-facing identity all use Oscilinea. The plug-in identity codes stay `Sshp`/`Hzny`, and internal C++ names deliberately keep the original `SoundShape` working name.
-- `scripts/package.sh` assembles the distributable beta folder and zip in `dist/` from the current Release build, including install scripts, checksums, and validation results.
+- `scripts/release.sh` builds the real distributable: a Developer ID-signed, notarized `.pkg` installer in `dist/` (build → sign with Hardened Runtime → pkg → notarize → staple). The standalone carries a microphone usage string + audio-input entitlement so it survives the Hardened Runtime. See `docs/DISTRIBUTION.md`.
+- `scripts/package.sh` remains as the older unsigned zip path, kept only for quick local testing.
 - Docs, git metadata, license, and project handoff files.
 
 Verification:
@@ -32,8 +33,9 @@ Verification:
 ## Next Steps
 
 1. Smoke test Standalone/Logic: confirm audio pass-through, the initially hidden panel toggle is discoverable, Glide ranges from instant cycle-span changes to long transitions, line-style changes update preset values without moving controls, Clean and Ink retain their expected looks, the extra line presets and wider Weight range feel useful, Flip mirrors the editor/source/capture display as Off, X, Y, and X+Y, Record starts instantly with a running timecode, ending recording prompts for a destination and writes a playable `.mov` with audio, Transparent records alpha as expected, Source Window opens and updates, and External Source appears in Syphon-compatible tools for multiple plug-in instances.
-2. Send the first Oscilinea beta package once smoke testing looks good. No beta has ever been distributed; identity values and parameter IDs freeze once one is.
-3. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
+2. One-time signing setup on the build machine: create the **Developer ID Application** and **Developer ID Installer** certificates and store a `notarytool` profile named `oscilinea-notary`. Steps are in `docs/DISTRIBUTION.md`. Only an "Apple Development" cert is installed today, which cannot be used for distribution. After that, `./scripts/release.sh` produces the shippable installer.
+3. Send the first Oscilinea beta installer once smoke testing and signing setup are done. No beta has ever been distributed; identity values and parameter IDs freeze once one is.
+4. Decide whether v0.2 should add NDI or a true virtual-camera output beyond Syphon/source capture.
 
 ## Gotchas
 
@@ -48,3 +50,6 @@ Verification:
 - External Source is editor-driven. Closing the plug-in editor tears down that instance's Syphon server.
 - CMake `target_sources` paths use the internal `SoundShape` file names; a blanket SoundShape-to-Oscilinea replace breaks the build.
 - Recorder stop waits at most ten seconds for AVFoundation to finalize, then fails with a normal recording error instead of hanging the editor.
+- "Apple Developer ID" is the membership; distribution needs separate **Developer ID Application** and **Developer ID Installer** certificates, which are not the auto-created "Apple Development" cert. Notarization needs Hardened Runtime on every binary plus a secure timestamp (internet required).
+- The release `.pkg` installs system-wide, so it prompts once for an admin password. That is expected installer behavior, not a regression from the old per-user `INSTALL.command`.
+- Keep `scripts/release.config` (Developer ID overrides) and any `.cer`/`.p12`/`.csr`/key files out of git; `.gitignore` already excludes them.

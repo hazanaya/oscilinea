@@ -108,6 +108,12 @@ juce_add_plugin(Oscilinea
     COPY_PLUGIN_AFTER_BUILD     TRUE
     VST3_CATEGORIES             "Fx" "Analyzer"
     AU_MAIN_TYPE                "kAudioUnitType_Effect"
+    # The standalone wrapper opens an audio input to visualize it. macOS requires
+    # a usage string (and, under the Hardened Runtime, the matching entitlement in
+    # packaging/entitlements/standalone.entitlements) or it terminates the app the
+    # first time it touches the input device. Plug-ins inherit the host's input.
+    MICROPHONE_PERMISSION_ENABLED TRUE
+    MICROPHONE_PERMISSION_TEXT  "Oscilinea visualizes live audio from the selected input device."
     DESCRIPTION                 "Focused sound-shape visualizer with capture tools")
 
 target_sources(Oscilinea PRIVATE

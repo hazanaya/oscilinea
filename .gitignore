@@ -30,6 +30,13 @@ build/**/*.app
 # Packaging output
 dist/
 
+# Release secrets / local signing overrides (never commit)
+scripts/release.config
+*.cer
+*.p12
+*.csr
+devid_*.key
+
 # Tooling
 *.log
 __pycache__/

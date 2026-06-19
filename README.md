@@ -32,6 +32,23 @@ Validate the AU:
 auval -v aufx Sshp Hzny
 ```
 
+## Distribution
+
+To produce a signed, notarized installer to share with others:
+
+```bash
+./scripts/release.sh
+```
+
+This builds a universal Release, signs every format with your Developer ID,
+wraps them in a single `.pkg`, notarizes it with Apple, and writes the result to
+`dist/`. Friends double-click the `.pkg` to install (no security warnings) and
+double-click a newer one to update. First-time certificate setup and the full
+runbook are in [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md).
+
+`scripts/package.sh` produces the older unsigned zip and is kept only for quick
+local testing.
+
 ## Capture
 
 - **Record** starts immediately and turns into a red running timecode while armed. Press it again and the completed `.mov` asks where it should be saved. If you cancel that save dialog, the file remains in `~/Movies/Oscilinea Captures`.
@@ -57,8 +74,15 @@ auval -v aufx Sshp Hzny
 ├── CHANGELOG.md
 ├── docs/
 │   ├── ARCHITECTURE.md
+│   ├── DISTRIBUTION.md
 │   ├── ROADMAP.md
 │   └── decisions/
+├── packaging/
+│   ├── entitlements/
+│   └── resources/
+├── scripts/
+│   ├── release.sh        # signed + notarized .pkg installer
+│   └── package.sh        # unsigned zip (local testing)
 ├── extern/JUCE/
 ├── extern/Syphon-Framework/
 └── src/
@@ -73,6 +97,7 @@ auval -v aufx Sshp Hzny
 
 - [Design](DESIGN.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Distribution](docs/DISTRIBUTION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Handoff](HANDOFF.md)
 - [Decisions](docs/decisions/)

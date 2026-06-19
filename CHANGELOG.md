@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added `scripts/release.sh`, a one-command builder that produces a Developer
+  ID-signed, notarized `.pkg` installer for direct hand-off, with `--dry-run`,
+  `--skip-build`, and `--skip-notarize` modes.
+- Added `docs/DISTRIBUTION.md` with one-time certificate/notarization setup, the
+  per-release runbook, and the install/update experience for end users.
+- Added Hardened Runtime entitlements for the standalone and friendly installer
+  screens (`packaging/`), plus an ADR for signed `.pkg` distribution.
 - Scaffolded the independent Oscilinea JUCE plug-in project.
 - Added pass-through AU/VST3/Standalone build target with its own plug-in identity.
 - Added focused Oscilinea display, system-style control panel, `.mov` capture, and source-window capture support.
@@ -34,11 +41,18 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Distribution moves from an ad-hoc-signed zip to a signed, notarized `.pkg`.
+  The standalone installs to `/Applications` and the plug-ins to the system
+  `/Library/Audio/Plug-Ins` locations; end users install and update by
+  double-clicking the `.pkg`, with no Gatekeeper warnings.
 - Renamed project documentation and product copy to Oscilinea after lightweight name research.
 - Renamed the build targets, bundle ID, and user-facing strings to Oscilinea. The plug-in identity codes (`Sshp`/`Hzny`) and parameter IDs are unchanged; internal C++ names deliberately keep the original working name.
 - New-instance appearance defaults now live in the `Oscilinea` application support folder.
 
 ### Fixed
 
+- The standalone app now declares a microphone usage string paired with the
+  audio-input entitlement, so it no longer crashes on launch when opening the
+  audio input on modern macOS.
 - Widened the scope feed write positions to 64-bit so displays stay correct through multi-day continuous sessions.
 - Stopping a recording now gives up with an error after ten seconds instead of hanging the editor if the encoder never finishes.

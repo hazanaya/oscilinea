@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        Hardened Runtime entitlements for the Oscilinea standalone app.
+
+        The standalone wrapper opens a system audio input so it has a signal to
+        visualize. Under the Hardened Runtime (required for notarization) that
+        capability is denied unless declared here. This pairs with the
+        NSMicrophoneUsageDescription string injected into the app's Info.plist by
+        CMake (MICROPHONE_PERMISSION_* in CMakeLists.txt). Without both, macOS
+        terminates the app the first time it touches the input device.
+
+        The AU and VST3 plug-ins do NOT use these entitlements: they run inside
+        the host's process and inherit the host's permissions.
+    -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>
