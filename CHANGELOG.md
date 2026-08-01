@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## 0.0.1-beta.20260801 — First public beta
+
+Released 2026-08-01 via GitHub Releases
+([hazanaya/oscilinea](https://github.com/hazanaya/oscilinea/releases/tag/v0.0.1-beta.20260801))
+and [hazaelanaya.com/oscilinea](https://www.hazaelanaya.com/oscilinea).
 
 ### Fixed
 
