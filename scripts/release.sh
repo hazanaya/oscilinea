@@ -166,7 +166,10 @@ build_component_pkg() { # <bundle> <install-location> <identifier-suffix> <out>
     # in place instead of installing to $location.
     local cplist="$root-components.plist"
     pkgbuild --analyze --root "$root" "$cplist" >/dev/null
-    /usr/libexec/PlistBuddy -c "Set :0:BundleIsRelocatable false" "$cplist"
+    # --analyze omits the key when it would default to true; Add it, or Set it
+    # if a future macOS starts emitting it.
+    /usr/libexec/PlistBuddy -c "Add :0:BundleIsRelocatable bool false" "$cplist" 2>/dev/null \
+        || /usr/libexec/PlistBuddy -c "Set :0:BundleIsRelocatable false" "$cplist"
     pkgbuild --quiet \
         --root "$root" \
         --component-plist "$cplist" \
