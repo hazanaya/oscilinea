@@ -186,7 +186,7 @@ cat > "$DIST_XML" <<XML
     <welcome file="welcome.html" mime-type="text/html"/>
     <conclusion file="conclusion.html" mime-type="text/html"/>
     <license file="LICENSE.txt" mime-type="text/plain"/>
-    <options customize="allow" require-scripts="false" hostArchitectures="arm64,x86_64"/>
+    <options customize="always" require-scripts="false" hostArchitectures="arm64,x86_64"/>
     <volume-check>
         <allowed-os-versions>
             <os-version min="11.0"/>

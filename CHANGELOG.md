@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- The installer now always shows the component selection screen, so people can
+  check or uncheck the Audio Unit, VST3, and Standalone app individually
+  instead of the choices hiding behind a "Customize" button.
 - Renamed the plug-in manufacturer display name from "Hazael Anaya" to "Haza",
   so Oscilinea and future plug-ins group under a Haza folder in DAW plug-in
   menus. Identity codes (`Hzny`, `Sshp`) and the bundle ID are unchanged.
