@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-06-19
+Last updated: 2026-08-01
 
 ## Where Things Stand
 
@@ -18,6 +18,7 @@ Current scaffold includes:
 - Each recording uses a UUID-backed temporary filename in `~/Movies/Oscilinea Captures`, so separate plug-in instances can record at the same time without colliding.
 - Syphon is pinned as `extern/Syphon-Framework` and compiled into the macOS build as a server-side source publisher. External Source runs from the editor vblank loop and stops when that editor closes.
 - Build, bundle, and user-facing identity all use Oscilinea. The plug-in identity codes stay `Sshp`/`Hzny`, and internal C++ names deliberately keep the original `SoundShape` working name.
+- The manufacturer display name is "Haza" (ADR 0007) — the DAW menu folder Oscilinea and all future plug-ins group under. Hosts list it as "Haza: Oscilinea". Identity codes and bundle ID are unchanged.
 - `scripts/release.sh` builds the real distributable: a Developer ID-signed, notarized `.pkg` installer in `dist/` (build → sign with Hardened Runtime → pkg → notarize → staple). The standalone carries a microphone usage string + audio-input entitlement so it survives the Hardened Runtime. See `docs/DISTRIBUTION.md`.
 - `scripts/package.sh` remains as the older unsigned zip path, kept only for quick local testing.
 - Docs, git metadata, license, and project handoff files.
@@ -43,6 +44,7 @@ Verification:
 ## Gotchas
 
 - Do not change `PLUGIN_CODE=Sshp`, `PLUGIN_MANUFACTURER_CODE=Hzny`, or the Oscilinea bundle ID after release.
+- `COMPANY_NAME "Haza"` freezes once the first beta ships; future plug-ins must use the identical string to share the DAW menu folder.
 - Do not rename parameter IDs once sessions may exist in user hosts.
 - New-instance appearance defaults are external preference data, not plug-in parameters. They are applied at construction and then host-saved state can override them.
 - Recording runs on the UI thread. Keep it out of `processBlock`.

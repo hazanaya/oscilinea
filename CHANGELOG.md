@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the plug-in manufacturer display name from "Hazael Anaya" to "Haza",
+  so Oscilinea and future plug-ins group under a Haza folder in DAW plug-in
+  menus. Identity codes (`Hzny`, `Sshp`) and the bundle ID are unchanged.
+
 ### Added
 
 - Added `scripts/release.sh`, a one-command builder that produces a Developer

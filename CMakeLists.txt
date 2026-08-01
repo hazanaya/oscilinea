@@ -92,7 +92,7 @@ if(APPLE)
 endif()
 
 juce_add_plugin(Oscilinea
-    COMPANY_NAME                "Hazael Anaya"
+    COMPANY_NAME                "Haza"
     COMPANY_EMAIL               "hazael.anaya@gmail.com"
     PLUGIN_MANUFACTURER_CODE    Hzny
     PLUGIN_CODE                 Sshp
