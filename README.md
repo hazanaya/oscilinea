@@ -1,5 +1,7 @@
 # Oscilinea
 
+![Oscilinea trace](assets/oscilinea-feature-shape.png)
+
 A focused macOS audio visualizer plug-in that renders the living shape of a sound — and makes that display easy to record or capture in streaming and video tools.
 
 **Downloads live in [Releases](../../releases).**
