@@ -99,6 +99,7 @@ juce_add_plugin(Oscilinea
     BUNDLE_ID                   com.hazaelanaya.oscilinea
     PLUGIN_NAME                 "Oscilinea"
     PRODUCT_NAME                "Oscilinea"
+    ICON_BIG                    "${CMAKE_CURRENT_SOURCE_DIR}/packaging/icon/oscilinea-1024.png"
     FORMATS                     AU VST3 Standalone
     IS_SYNTH                    FALSE
     NEEDS_MIDI_INPUT            FALSE

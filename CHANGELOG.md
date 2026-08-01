@@ -21,6 +21,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added an app icon: a glowing wave-packet trace on a dark squircle, generated
+  by `packaging/icon/make-icon.swift` and wired in via JUCE's `ICON_BIG`.
 - Added `scripts/release.sh`, a one-command builder that produces a Developer
   ID-signed, notarized `.pkg` installer for direct hand-off, with `--dry-run`,
   `--skip-build`, and `--skip-notarize` modes.
