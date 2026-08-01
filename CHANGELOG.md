@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Pinned installer components as non-relocatable, so the installer always
+  installs to `/Applications` and `/Library/Audio/Plug-Ins` instead of
+  silently updating a stray older copy found elsewhere on the disk.
+
 ### Changed
 
 - The installer now always shows the component selection screen, so people can

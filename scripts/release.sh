@@ -160,8 +160,16 @@ build_component_pkg() { # <bundle> <install-location> <identifier-suffix> <out>
     local bundle="$1" location="$2" suffix="$3" out="$4"
     local root; root="$(mktemp -d "$WORK/root.XXXXXX")"
     ditto "$bundle" "$root/$(basename "$bundle")"
+    # Pin the bundle to its install location. By default Installer "relocates":
+    # it finds any existing copy by bundle ID via Spotlight (an old install in
+    # ~/Applications, a build tree, an unzipped release) and updates that copy
+    # in place instead of installing to $location.
+    local cplist="$root-components.plist"
+    pkgbuild --analyze --root "$root" "$cplist" >/dev/null
+    /usr/libexec/PlistBuddy -c "Set :0:BundleIsRelocatable false" "$cplist"
     pkgbuild --quiet \
         --root "$root" \
+        --component-plist "$cplist" \
         --install-location "$location" \
         --identifier "${BUNDLE_ID_BASE}.${suffix}" \
         --version "$PKGVER" \

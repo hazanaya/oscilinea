@@ -58,3 +58,5 @@ Verification:
 - "Apple Developer ID" is the membership; distribution needs separate **Developer ID Application** and **Developer ID Installer** certificates, which are not the auto-created "Apple Development" cert. Notarization needs Hardened Runtime on every binary plus a secure timestamp (internet required).
 - The release `.pkg` installs system-wide, so it prompts once for an admin password. That is expected installer behavior, not a regression from the old per-user `INSTALL.command`.
 - Keep `scripts/release.config` (Developer ID overrides) and any `.cer`/`.p12`/`.csr`/key files out of git; `.gitignore` already excludes them.
+- Component pkgs must stay pinned with `BundleIsRelocatable=false`. Without it, Installer finds any existing copy by bundle ID (old `~/Applications` install, build tree, unzipped release) and updates that copy in place instead of installing to the intended location.
+- macOS App Management (TCC) blocks command-line moves/deletes of installed app bundles; stray app copies have to be removed via Finder.
