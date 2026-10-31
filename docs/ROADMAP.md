@@ -2,9 +2,9 @@
 
 ## Now
 
-- Build the independent Oscilinea plug-in.
-- Verify AU/VST3/Standalone builds.
-- Smoke test Record and Source Window in Standalone.
+- Get the shipped beta in front of people: the launch chunks in `HANDOFF.md`
+  (OBS smoke test, demo clip, KVR listing, one Reddit post, a month of listening).
+  Decision: [ADR 0008](decisions/0008-v0.2-is-distribution.md).
 
 ## Next
 

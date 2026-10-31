@@ -43,3 +43,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Marketing media (clips, screenshots); text beside them is tracked
+marketing/clips/
