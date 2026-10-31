@@ -111,4 +111,18 @@ local testing.
 
 ## License
 
-See [LICENSE](LICENSE). JUCE is linked under its own separate license.
+Oscilinea is free and open-source software under the **GNU Affero General Public
+License, version 3** ([LICENSE](LICENSE)). Copyright (c) 2026 Jorge Hazael Anaya.
+Decision and reasoning: [ADR 0009](docs/decisions/0009-open-source-under-agplv3.md).
+
+- You may use, study, modify, and redistribute it, including modified versions,
+  as long as your version is also released under the AGPLv3 with its source.
+- The name "Oscilinea", its icon, and the "Haza" manufacturer name are
+  trademarks and are not licensed; see [TRADEMARKS.md](TRADEMARKS.md). Forks need
+  their own name, icon, and plug-in identity codes.
+- Third-party code: [JUCE 8](extern/JUCE/LICENSE.md) is used under its AGPLv3
+  option; [Syphon-Framework](extern/Syphon-Framework/License.txt) is under a
+  BSD-style license. Both ship as git submodules and keep their own notices.
+- Contributions are welcome in principle but will be asked for a short
+  contributor agreement before merging, so the author keeps the right to
+  relicense his own work (ADR 0009).

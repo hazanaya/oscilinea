@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- License: the source is now released under the GNU Affero General Public
+  License v3 (was All Rights Reserved). JUCE 8 is used under its AGPLv3 option;
+  Syphon-Framework stays under its BSD-style license. See
+  [ADR 0009](docs/decisions/0009-open-source-under-agplv3.md).
+
+### Added
+
+- `TRADEMARKS.md`: the Oscilinea name and icon and the "Haza" manufacturer name
+  are not part of the open-source license.
+
 ## 0.0.1-beta.20260801 — First public beta
 
 Released 2026-08-01 via GitHub Releases

@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-10-30
+Last updated: 2026-10-31
 
 ## Where Things Stand
 
@@ -22,6 +22,7 @@ Current scaffold includes:
 - `scripts/release.sh` builds the real distributable: a Developer ID-signed, notarized `.pkg` installer in `dist/` (build → sign with Hardened Runtime → pkg → notarize → staple). The standalone carries a microphone usage string + audio-input entitlement so it survives the Hardened Runtime. See `docs/DISTRIBUTION.md`.
 - `scripts/package.sh` remains as the older unsigned zip path, kept only for quick local testing.
 - Docs, git metadata, license, and project handoff files.
+- **License: AGPLv3 since 2026-10-31** ([ADR 0009](docs/decisions/0009-open-source-under-agplv3.md)), decided by Haza; `TRADEMARKS.md` keeps the name, icon, and "Haza" manufacturer name out of the license. The source is NOT yet published: the public repo `hazanaya/oscilinea` still holds only the marketing README and `assets/`. Publishing is launch chunk 0 below and happens at the desk.
 
 Verification:
 
@@ -45,6 +46,23 @@ months. Pick one chunk per sitting; each stands alone.
 
 **Launch chunks**
 
+0. **Publish the source** (Haza at the desk with the hub, ~30 min, one-way door).
+   Everything is prepared and committed locally; this chunk only pushes it.
+   - This folder has no git remote. Add `origin` =
+     `https://github.com/hazanaya/oscilinea.git`, then `git fetch origin`.
+   - The public `main` has its own short history (marketing `README.md` +
+     `assets/`). Merge it in with `git merge --allow-unrelated-histories
+     origin/main`; resolve the one conflict in `README.md` by keeping the
+     marketing text at the top (downloads, highlights, install) and this
+     repo's developer sections (build, layout, license) below it. Keep `assets/`.
+   - Re-run the secret check before pushing: `git log -p --all -- . ':(exclude)extern' | grep -Ei 'BEGIN (RSA|EC|OPENSSH|PRIVATE)|AKIA|ghp_|xox[baprs]-'` must print nothing.
+   - `git push origin main`. Check that GitHub shows "AGPL-3.0" next to the repo
+     name and that `extern/` renders as two submodule links (JUCE, Syphon).
+   - Repo settings: wiki off; decide whether issues stay on (the public README
+     invites bug reports, so probably yes). Add the website as homepage and
+     topics `juce`, `audio-plugin`, `oscilloscope`, `syphon`, `macos`.
+   - Update https://www.hazaelanaya.com/oscilinea with one line: free and open
+     source, AGPLv3, source on GitHub.
 1. **OBS smoke test** (at the desk, ~15 min). Install OBS (`brew install --cask obs`),
    run the Oscilinea standalone with audio, add a *Syphon Client* source in OBS and
    confirm the External Source appears and updates. Record the result under
@@ -52,7 +70,7 @@ months. Pick one chunk per sitting; each stands alone.
 2. **Demo clip** (at the desk, ~30 min). Play a track through the standalone and
    record 30 to 45 seconds with Oscilinea's own recorder (opaque H.264 is fine for
    posting). Keep the file in `marketing/clips/` (ignored by git) and note its name here.
-3. **Listing text** (hub session, no desk needed). From README.md write
+3. **Listing text** (hub session, after chunk 0). Say "free and open source (AGPLv3)" and link the repo. From README.md write
    `marketing/kvr-listing.md` (name, one-line tagline, description, feature list,
    requirements, price Free, links) and `marketing/reddit-post.md` (title, body,
    two candidate subreddits with each one's self-promotion rule quoted).
